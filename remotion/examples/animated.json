@@ -1,0 +1,17 @@
+{
+  "duration": 12,
+  "theme": { "bg": "#120E24", "accent": "#7CF29C" },
+  "shots": [
+    { "at": 0, "type": "kinetic", "text": "Your boss read your texts", "highlight": "read" },
+    { "at": 2.5, "type": "chat", "title": "Boss", "transition": "slide", "messages": [
+      { "from": "them", "text": "Quick call?", "at": 0.2 },
+      { "from": "me", "text": "Sure! 😊", "at": 1.0 },
+      { "from": "them", "text": "Not that one. The other chat.", "at": 1.9 }
+    ] },
+    { "at": 6, "type": "compare", "title": "What you meant vs what they saw", "transition": "wipe",
+      "left": { "label": "Meant", "items": ["Venting", "Inside joke"] },
+      "right": { "label": "Saw", "items": ["Resignation", "HR case"] } },
+    { "at": 9.5, "type": "title", "text": "Two phones. Always.", "highlight": "Always.", "transition": "zoom" }
+  ],
+  "watermark": "@yourhandle"
+}

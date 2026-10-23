@@ -1,0 +1,17 @@
+node_modules/
+remotion/out/
+remotion/public/_job/
+remotion/examples/assets/
+dist/
+.vendor/
+.DS_Store
+*.log
+# Remotion's own skills are downloaded by setup.sh, not committed
+.claude/skills/remotion-*/
+# personal settings
+.claude/settings.local.json
+# your own channels stay out of git by default (remove this line to commit them)
+channels/*/
+!channels/_template/
+channels/answers-*.json
+remotion/examples/beats.spec.json

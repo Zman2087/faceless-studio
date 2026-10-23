@@ -1,0 +1,20 @@
+{
+  "duration": 10,
+  "theme": { "bg": "#0B1530", "accent": "#F2B544" },
+  "audio": "assets/stand-in-voice.mp3",
+  "words": [
+    {"w":"This","s":0.3,"e":0.5},{"w":"habit","s":0.5,"e":0.85},{"w":"costs","s":0.85,"e":1.2},{"w":"you","s":1.2,"e":1.35},
+    {"w":"$1,400","s":1.35,"e":2.0},{"w":"a","s":2.0,"e":2.1},{"w":"year.","s":2.1,"e":2.5},
+    {"w":"Here's","s":3.1,"e":3.4},{"w":"the","s":3.4,"e":3.5},{"w":"maths.","s":3.5,"e":4.0},
+    {"w":"Five","s":4.4,"e":4.7},{"w":"coffees","s":4.7,"e":5.1},{"w":"a","s":5.1,"e":5.2},{"w":"week,","s":5.2,"e":5.6},
+    {"w":"fifty-two","s":5.8,"e":6.3},{"w":"weeks.","s":6.3,"e":6.8},
+    {"w":"Small","s":7.2,"e":7.5},{"w":"leak.","s":7.5,"e":7.9},{"w":"Big","s":8.1,"e":8.4},{"w":"bucket.","s":8.4,"e":9.0}
+  ],
+  "shots": [
+    { "at": 0, "type": "media", "src": "assets/stand-in-photo.jpg", "label": "your morning", "headline": "This habit costs $1,400", "highlight": "$1,400", "stamp": { "text": "$1,400", "at": 0.1, "color": "danger" }, "credit": "Photo: stand-in" },
+    { "at": 3, "type": "number", "value": 1400, "prefix": "$", "caption": "a year on takeaway coffee", "color": "danger", "label": "the maths" },
+    { "at": 5.5, "type": "bars", "title": "Where it goes", "unit": "", "items": [ { "label": "Coffee", "value": 1400, "color": "danger" }, { "label": "Streaming", "value": 600, "color": "muted" }, { "label": "Gym", "value": 900, "color": "accent" } ] },
+    { "at": 8, "type": "title", "text": "Small leak. Big bucket.", "highlight": "Big bucket." }
+  ],
+  "watermark": "@yourhandle"
+}

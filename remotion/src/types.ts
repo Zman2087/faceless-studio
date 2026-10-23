@@ -1,0 +1,110 @@
+// The spec format every agent writes and render.mjs renders.
+// One spec = one video (a 10 s block, a full Short, or a talking clip with overlays).
+// See ../SPEC.md for the full reference.
+
+export type Theme = {
+  bg: string; // page background
+  text: string; // main text
+  muted: string; // secondary text
+  accent: string; // highlight pill, routes, stamps
+  danger: string; // losses, warnings
+  good: string; // gains
+  font: string; // font family (Montserrat is bundled)
+  font_file?: string; // optional .woff2 in public/ or a URL, for a custom font
+};
+
+export type Word = { w: string; s: number; e: number }; // word, start s, end s
+
+export type Stamp = { text: string; at?: number; color?: "accent" | "danger" | "good"; y?: number };
+
+type ShotBase = {
+  at: number; // seconds from the start of the spec
+  label?: string; // small mono kicker above the content
+  stamp?: Stamp;
+  bg?: string; // optional media background for card shots (image or video)
+  credit?: string; // licence credit shown small in the corner when bg/src is used
+  transition?: "fade" | "cut" | "slide" | "zoom" | "wipe"; // how this shot comes in (default fade)
+};
+
+export type TitleShot = ShotBase & { type: "title"; text: string; highlight?: string };
+export type NumberShot = ShotBase & {
+  type: "number";
+  value: number;
+  prefix?: string;
+  suffix?: string;
+  decimals?: number;
+  caption?: string;
+  color?: "accent" | "danger" | "good";
+};
+export type BarsShot = ShotBase & {
+  type: "bars";
+  title?: string;
+  unit?: string;
+  items: { label: string; value: number; color?: "accent" | "danger" | "good" | "muted" }[];
+};
+export type ListShot = ShotBase & { type: "list"; title?: string; items: string[]; style?: "tick" | "cross" | "number" };
+export type TimelineShot = ShotBase & { type: "timeline"; title?: string; items: { year: string; text: string }[] };
+export type QuoteShot = ShotBase & { type: "quote"; text: string; by?: string };
+export type MediaShot = ShotBase & {
+  type: "media";
+  src: string; // mp4/webm/png/jpg: AI clip, footage, photo
+  start?: number; // seconds into the source video
+  fit?: "cover" | "contain";
+  kenburns?: boolean; // slow zoom on photos
+  muted?: boolean; // default true unless it is the talking clip
+  headline?: string;
+  highlight?: string;
+};
+
+export type CompareShot = ShotBase & {
+  type: "compare";
+  title?: string;
+  left: { label: string; items: string[]; color?: "accent" | "danger" | "good" | "muted" };
+  right: { label: string; items: string[]; color?: "accent" | "danger" | "good" | "muted" };
+};
+export type ChatShot = ShotBase & {
+  type: "chat";
+  title?: string; // contact name in the header
+  messages: { from: "me" | "them"; text: string; at?: number }[]; // at = seconds after the shot starts
+};
+export type KineticShot = ShotBase & {
+  type: "kinetic";
+  text: string; // words pop in one by one
+  highlight?: string; // exact word or phrase drawn in the accent colour
+  per_word?: number; // seconds between words (default 0.18)
+};
+
+export type Shot = TitleShot | NumberShot | BarsShot | ListShot | TimelineShot | QuoteShot | MediaShot | CompareShot | ChatShot | KineticShot;
+
+export type Overlay = {
+  at: number;
+  end?: number;
+  type: "textover" | "stamp" | "headline" | "lowerthird" | "titlecard" | "choice" | "cameo" | "meter";
+  value?: number; // meter: 0-100 now
+  from?: number; // meter: value at the end of last part
+  options?: { key: string; label: string }[]; // choice: the A/B/C options
+  handles?: string[]; // cameo: buyer handles shown in-world
+  text: string;
+  highlight?: string;
+  sub?: string;
+  y?: number;
+  color?: "accent" | "danger" | "good";
+};
+
+export type Spec = {
+  duration: number; // seconds
+  width?: number;
+  height?: number;
+  fps?: number;
+  theme?: Partial<Theme>;
+  audio?: string; // narration / voice file
+  audio_volume?: number;
+  music?: string; // optional bed under the voice
+  music_volume?: number;
+  words?: Word[]; // per-word timings for burned-in captions
+  captions?: { enabled?: boolean; words_per_chunk?: number; y?: number; case?: "sentence" | "upper" };
+  shots: Shot[];
+  overlays?: Overlay[];
+  watermark?: string; // e.g. @handle
+  ai_label?: boolean; // small "AI-generated" tag (on by default)
+};

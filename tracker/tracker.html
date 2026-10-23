@@ -1,0 +1,570 @@
+<title>Faceless Studio</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,800&family=IBM+Plex+Sans:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+/* Layout: a production office for one AI character. Header + KPI strip, then a pipeline board of posts, a detail drawer, and agent log. */
+:root{
+  --paper:#f3f2ee; --sheet:#ffffff; --ink:#1d2129; --muted:#5f6571; --rule:#d9d8d1;
+  --stamp:#9b2d22; --stamp-soft:#f4e3df; --good:#2f6f4f; --good-soft:#e2efe7; --warn:#8a5a00; --warn-soft:#f6ecd6;
+  --chip:#ecebe5;
+  --display:"Bricolage Grotesque",ui-sans-serif,system-ui,sans-serif;
+  --body:"IBM Plex Sans",ui-sans-serif,system-ui,sans-serif;
+  --mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#15171b; --sheet:#1d2026; --ink:#e8e7e2; --muted:#9ea3ad; --rule:#30343c;
+  --stamp:#e0715f; --stamp-soft:#3a2420; --good:#7cc49b; --good-soft:#1f3229; --warn:#e2b155; --warn-soft:#3a3020; --chip:#272a31; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#15171b; --sheet:#1d2026; --ink:#e8e7e2; --muted:#9ea3ad; --rule:#30343c;
+  --stamp:#e0715f; --stamp-soft:#3a2420; --good:#7cc49b; --good-soft:#1f3229; --warn:#e2b155; --warn-soft:#3a3020; --chip:#272a31; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+body{background:var(--paper);color:var(--ink);font:15px/1.5 var(--body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:24px 48px}
+.wrap{max-width:1240px;margin:0 auto;display:grid;gap:28px}
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:16px;border-bottom:2px solid var(--ink);padding-bottom:16px}
+.eyebrow{font:500 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted)}
+h1{font:800 clamp(30px,5vw,52px)/1 var(--display);margin:6px 0 0;letter-spacing:-.02em;text-wrap:balance}
+h1 span{color:var(--stamp)}
+h2{font:600 20px/1.2 var(--display);margin:0;text-wrap:balance}
+.hdr-actions{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+button,.btn{font:500 13px/1 var(--body);border:1px solid var(--ink);background:transparent;color:var(--ink);padding:9px 14px;border-radius:4px;cursor:pointer}
+button:hover{background:var(--chip)}
+button:focus-visible,a:focus-visible,input:focus-visible,textarea:focus-visible{outline:2px solid var(--stamp);outline-offset:2px}
+button.primary{background:var(--ink);color:var(--paper)}
+button.danger{border-color:var(--stamp);color:var(--stamp)}
+button[disabled]{opacity:.45;cursor:not-allowed}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:1px;background:var(--rule);border:1px solid var(--rule)}
+.kpi{background:var(--sheet);padding:14px 16px;display:grid;gap:4px;min-width:0}
+.kpi b{font:600 24px/1.1 var(--mono);font-variant-numeric:tabular-nums}
+.kpi small{color:var(--muted);font-size:12px}
+.meter{height:4px;background:var(--chip);border-radius:2px;overflow:hidden}
+.meter i{display:block;height:100%;background:var(--ink)}
+.meter i.over{background:var(--stamp)}
+.banner{border:1px solid var(--stamp);background:var(--stamp-soft);color:var(--ink);padding:12px 14px;border-radius:4px;display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:space-between}
+.board-wrap{overflow-x:auto;padding-bottom:6px}
+.board{display:grid;grid-template-columns:repeat(6,minmax(200px,1fr));gap:12px;min-width:1260px}
+.col{display:grid;align-content:start;gap:10px;min-width:0}
+.col-h{display:flex;justify-content:space-between;align-items:baseline;border-bottom:1px solid var(--rule);padding-bottom:6px}
+.col-h span{font:500 11px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase}
+.col-h em{font:500 12px var(--mono);color:var(--muted);font-style:normal}
+.card{background:var(--sheet);border:1px solid var(--rule);border-radius:4px;padding:12px;display:grid;gap:8px;text-align:left;cursor:pointer;width:100%;color:var(--ink)}
+.card:hover{border-color:var(--ink);background:var(--sheet)}
+.card .case{font:500 11px var(--mono);color:var(--muted);display:flex;justify-content:space-between;gap:8px}
+.card .t{font:600 15px/1.25 var(--display)}
+.card .hook{font-size:13px;color:var(--muted);line-height:1.4}
+.pills{display:flex;flex-wrap:wrap;gap:6px}
+.pill{font:500 11px/1 var(--mono);padding:4px 7px;border-radius:3px;background:var(--chip);color:var(--ink);white-space:nowrap}
+.pill.good{background:var(--good-soft);color:var(--good)}
+.pill.warn{background:var(--warn-soft);color:var(--warn)}
+.pill.bad{background:var(--stamp-soft);color:var(--stamp)}
+.empty{border:1px dashed var(--rule);border-radius:4px;padding:14px;color:var(--muted);font-size:13px}
+.lower{display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr);gap:28px}
+@media (max-width:860px){.lower{grid-template-columns:1fr}}
+.panel{background:var(--sheet);border:1px solid var(--rule);border-radius:4px;padding:18px;display:grid;gap:14px;align-content:start;min-width:0}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th,td{text-align:left;padding:8px 6px;border-bottom:1px solid var(--rule);vertical-align:top}
+th{font:500 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right}
+.log{display:grid;gap:10px;max-height:420px;overflow:auto}
+.log div{display:grid;gap:2px;border-left:2px solid var(--rule);padding-left:10px}
+.log b{font:500 12px var(--mono)}
+.log span{font-size:13px;color:var(--muted)}
+/* drawer */
+.scrim{position:fixed;inset:0;background:rgb(0 0 0 / .35);z-index:20}
+.drawer{position:fixed;top:0;right:0;bottom:0;width:min(640px,100%);background:var(--paper);z-index:21;overflow:auto;border-left:2px solid var(--ink);padding:calc(20px + env(safe-area-inset-top,0px)) max(20px,env(safe-area-inset-right,0px)) calc(32px + env(safe-area-inset-bottom,0px)) 20px;display:grid;gap:18px;align-content:start}
+.drawer h2{font-size:26px}
+.stampmark{display:inline-block;border:2px solid var(--stamp);color:var(--stamp);font:600 12px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;padding:6px 8px;transform:rotate(-2deg)}
+.sec{display:grid;gap:8px}
+.sec h3{font:500 11px/1 var(--mono);letter-spacing:.12em;text-transform:uppercase;color:var(--muted);margin:0}
+.script{white-space:pre-wrap;background:var(--sheet);border:1px solid var(--rule);padding:14px;border-radius:4px;font-size:14px;line-height:1.6}
+.cap{background:var(--sheet);border:1px solid var(--rule);border-radius:4px;padding:12px;display:grid;gap:8px}
+.cap header{border:0;padding:0;align-items:center}
+.cap p{margin:0;white-space:pre-wrap;font-size:14px}
+.kit{border:2px solid var(--ink);border-radius:4px;padding:14px;background:var(--sheet)}
+.kitgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+.kitbtn{display:grid;gap:2px;padding:12px 14px;border-radius:4px;background:var(--ink);color:var(--paper);text-decoration:none}
+.kitbtn b{font:600 16px var(--display)}
+.kitbtn span{font-size:12px;opacity:.8}
+.kitbtn:hover{opacity:.9}
+.kitbtn.off{background:var(--chip);color:var(--muted)}
+.card .kitmini{display:flex;gap:6px;flex-wrap:wrap}
+.refs{border-top:2px solid var(--ink);padding-top:14px}
+.refs ol{margin:0;padding-left:20px;display:grid;gap:12px}
+.refs li{font-size:14px}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px}
+label{display:grid;gap:4px;font-size:12px;color:var(--muted)}
+input,textarea,select{font:14px var(--body);color:var(--ink);background:var(--sheet);border:1px solid var(--rule);border-radius:4px;padding:8px 10px;width:100%}
+textarea{min-height:90px;resize:vertical}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+a{color:var(--stamp)}
+.toast{position:fixed;left:50%;bottom:calc(20px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--ink);color:var(--paper);padding:10px 16px;border-radius:4px;font-size:13px;z-index:30}
+.note{font-size:13px;color:var(--muted);margin:0}
+.profiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(260px,1fr));gap:12px}
+.prof{background:var(--sheet);border:1px solid var(--rule);border-radius:4px;padding:14px;display:grid;gap:10px;align-content:start;min-width:0}
+.prof h3{font:600 17px/1.2 var(--display);margin:0}
+.pf{display:grid;gap:4px}
+.pf .lbl{display:flex;justify-content:space-between;align-items:center;gap:8px}
+.pf .lbl span{font:500 11px/1 var(--mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.pf .lbl button{padding:5px 9px;font-size:12px}
+.pf p{margin:0;white-space:pre-wrap;font-size:14px;overflow-wrap:anywhere}
+.pf p.handle{font:500 15px var(--mono)}
+.pf small{color:var(--muted);font:500 11px var(--mono)}
+.queue{display:grid;gap:8px}
+.qrow{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:12px;align-items:center;background:var(--sheet);border:1px solid var(--rule);border-radius:4px;padding:10px 12px;text-align:left;width:100%;color:var(--ink)}
+.qrow:hover{border-color:var(--ink);background:var(--sheet)}
+.qrow .n{font:600 18px var(--mono);color:var(--muted);min-width:24px}
+.qrow .t{font:600 15px/1.25 var(--display)}
+.qrow .s{font-size:12px;color:var(--muted)}
+.pgrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:12px}
+.pcard{background:var(--sheet);border:1px solid var(--rule);border-radius:4px;padding:14px;display:grid;gap:10px;text-align:left;color:var(--ink);width:100%}
+.pcard:hover{border-color:var(--ink);background:var(--sheet)}
+.pcard .big{font:600 28px/1 var(--mono);font-variant-numeric:tabular-nums}
+.bars{display:grid;gap:6px}
+.bar{display:grid;grid-template-columns:62px minmax(0,1fr) 64px;gap:8px;align-items:center;font:500 12px var(--mono)}
+.bar i{display:block;height:10px;border-radius:2px;background:var(--ink)}
+.bar i.zero{background:transparent;border:1px dashed var(--rule);height:8px}
+.bar span:last-child{text-align:right;font-variant-numeric:tabular-nums}
+
+@media (prefers-reduced-motion:no-preference){.drawer{animation:slide .18s ease-out}@keyframes slide{from{transform:translateX(24px);opacity:.6}}}
+</style>
+
+<div class="wrap">
+  <header>
+    <div>
+      <div class="eyebrow" id="eyebrow">Faceless Studio · production office</div>
+      <h1 id="brandName">Faceless <span>Studio</span></h1>
+    </div>
+    <div class="hdr-actions">
+      <span id="statusPill" class="pill">Connecting…</span>
+      <button id="pauseBtn" type="button" disabled>Pause agents</button>
+    </div>
+  </header>
+
+  <div id="pausedBanner" class="banner" hidden>
+    <span><b>Agents are paused.</b> Scheduled runs will check in and stop without writing or spending credits.</span>
+    <button id="resumeBtn" type="button" class="primary">Resume agents</button>
+  </div>
+
+  <section class="kpis" aria-label="This week and month">
+    <div class="kpi"><span class="eyebrow">Videos this week</span><b id="kWeek">–</b><div class="meter"><i id="mWeek" style="width:0"></i></div><small id="kWeekNote">Cap set in channel settings</small></div>
+    <div class="kpi"><span class="eyebrow">Credits this month</span><b id="kCredits">–</b><div class="meter"><i id="mCredits" style="width:0"></i></div><small id="kCreditsNote">Producer stops at the budget</small></div>
+    <div class="kpi"><span class="eyebrow">Ready to post</span><b id="kReady">–</b><small>Download, then paste the captions</small></div>
+    <div class="kpi"><span class="eyebrow">Posted so far</span><b id="kPosted">–</b><small id="kViews">Total views will show here</small></div>
+  </section>
+
+  <section class="sec" aria-labelledby="nextH">
+    <div class="row" style="justify-content:space-between"><h2 id="nextH">Up next</h2><p class="note">What you post next, then what's being made. Anything waiting for your OK is marked. Tap one to open it.</p></div>
+    <div class="queue" id="queue"><div class="empty">Loading…</div></div>
+  </section>
+
+  <section class="sec" aria-labelledby="postedH">
+    <div class="row" style="justify-content:space-between"><h2 id="postedH">Posted · analytics</h2><p class="note" id="postedNote">Views per app, views per day since posting, and the best app for each video.</p></div>
+    <div class="pgrid" id="postedCards"><div class="empty">No posted videos yet.</div></div>
+  </section>
+
+  <section class="sec" aria-labelledby="filtH">
+    <div class="row" style="justify-content:space-between"><h2 id="filtH">Filter</h2><p class="note">Pick a channel, an app and a series. Profiles, posts and posted videos below follow your choice.</p></div>
+    <div class="grid3" style="align-items:end">
+      <label>Channel<select id="fChannel"></select></label>
+      <label>App profile<select id="fApp"><option value="all">All apps</option><option value="tiktok">TikTok</option><option value="instagram">Instagram</option><option value="youtube">YouTube</option></select></label>
+      <label>Series<select id="fSeries"></select></label>
+    </div>
+    <div class="pills" id="seriesChips" style="margin-top:10px"></div>
+    <p class="note" id="seriesDesc"></p>
+  </section>
+
+  <section class="sec" aria-labelledby="anaH">
+    <div class="row" style="justify-content:space-between"><h2 id="anaH">What's working</h2><p class="note" id="anaWhen">Analysis of posted videos. The planner reads this before choosing what to make.</p></div>
+    <div id="analysis"><div class="empty">No analysis yet. It runs after views are entered.</div></div>
+  </section>
+
+  <section class="sec" aria-labelledby="profH">
+    <div class="row" style="justify-content:space-between"><h2 id="profH">Channel profiles</h2><p class="note">Username, display name and bio for each app. Tap Copy and paste it into the app's profile settings.</p></div>
+    <div class="profiles" id="profiles"><div class="empty">Profiles load from the tracker.</div></div>
+  </section>
+
+  <section class="sec" aria-labelledby="storyH" id="storySec" hidden>
+    <div class="row" style="justify-content:space-between"><h2 id="storyH">Story so far</h2><p class="note">What the audience has decided, part by part. The Showrunner writes this after each vote closes.</p></div>
+    <div id="stakes" class="kpis"></div>
+    <div class="log" id="canon" style="margin-top:10px"></div>
+  </section>
+
+  <section class="sec" aria-labelledby="camH" id="cameoSec" hidden>
+    <div class="row" style="justify-content:space-between"><h2 id="camH">Cameo passes</h2><p class="note">Add each buyer's handle when a sale comes in. The Showrunner places them in upcoming parts, oldest first, never as a suspect or victim.</p></div>
+    <div class="grid3" style="align-items:end">
+      <label>Handle<input id="cmHandle" placeholder="@buyer" maxlength="31"></label>
+      <label>Pass<select id="cmTier"><option value="pass">Cameo pass</option><option value="business">Business cameo</option></select></label>
+      <label>Order ref (optional)<input id="cmRef" placeholder="Gumroad sale ID" maxlength="60"></label>
+    </div>
+    <div class="row"><button type="button" class="primary" id="cmAdd">Add cameo</button></div>
+    <div class="log" id="cameoList" style="margin-top:10px"><div class="empty">No cameo passes yet.</div></div>
+  </section>
+
+  <section class="sec" aria-labelledby="reqH">
+    <div class="row" style="justify-content:space-between"><h2 id="reqH">Viewer requests</h2><p class="note">When a comment asks for a video (“do one about first dates”), add it here. The planner makes requests first, and the post reminds you who to reply to with the video.</p></div>
+    <div class="grid3" style="align-items:end">
+      <label>Topic or idea<input id="rqCompany" placeholder="e.g. your worst first date" maxlength="80"></label>
+      <label>Who asked (optional)<input id="rqWho" placeholder="@username" maxlength="40"></label>
+      <label>App<select id="rqApp"><option>TikTok</option><option>Instagram</option><option>YouTube</option></select></label>
+    </div>
+    <div class="row"><button type="button" class="primary" id="rqAdd">Add request</button></div>
+    <div class="log" id="reqList" style="margin-top:10px"><div class="empty">No requests yet.</div></div>
+  </section>
+
+  <section class="sec" aria-labelledby="pipeH">
+    <div class="row" style="justify-content:space-between"><h2 id="pipeH">Posts</h2><p class="note">Each card is one video moving through the agents. Open one for the script, prompts, audit, video and captions.</p></div>
+    <div class="board-wrap"><div class="board" id="board"></div></div>
+  </section>
+
+  <section class="lower">
+    <div class="panel">
+      <h2>Posted videos</h2>
+      <div style="overflow-x:auto"><table><thead><tr id="perfHead"><th>Post</th><th>Title</th><th class="num">TikTok</th><th class="num">Reels</th><th class="num">Shorts</th><th class="num">Total</th></tr></thead><tbody id="perfBody"></tbody></table></div>
+      <p class="note">Open a posted video and enter its views each week. The planner uses these numbers to choose what to make next.</p>
+    </div>
+    <div class="panel">
+      <h2>Agent activity</h2>
+      <div class="log" id="log"><div><b>Waiting for the first run</b><span>Each agent writes a line here every time it runs.</span></div></div>
+    </div>
+  </section>
+</div>
+
+<div id="scrim" class="scrim" hidden></div>
+<aside id="drawer" class="drawer" hidden aria-modal="true" role="dialog" aria-labelledby="dTitle"></aside>
+<div id="toast" class="toast" hidden></div>
+
+<script>
+const COLS=[
+  {key:"planned",label:"Planned",match:["planned"]},
+  {key:"writing",label:"Script & audit",match:["scripted","needs_rewrite","awaiting_owner"]},
+  {key:"approved",label:"Approved",match:["approved"]},
+  {key:"producing",label:"In production",match:["producing","produced","failed"]},
+  {key:"ready",label:"Ready to post",match:["ready"]},
+  {key:"posted",label:"Posted",match:["posted"]}
+];
+const STATUS_TEXT={awaiting_owner:"Needs your OK",planned:"Planned",scripted:"Awaiting audit",needs_rewrite:"Rewrite requested",approved:"Approved",producing:"Generating",produced:"Awaiting QA",failed:"Needs attention",ready:"Ready to post",posted:"Posted"};
+const STATUS_TONE={awaiting_owner:"bad",needs_rewrite:"warn",failed:"bad",ready:"good",posted:"good",approved:"good",producing:"warn"};
+let copyStore={};
+let db=null, canWrite=true, episodes=[], settings=null, runs=[], requests=[], cameos=[], openId=null;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const num=n=>Number(n||0).toLocaleString("en-AU");
+function toast(t){const el=$("toast");el.textContent=t;el.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>el.hidden=true,2200)}
+function weekStart(){const d=new Date();const day=(d.getDay()+6)%7;d.setHours(0,0,0,0);d.setDate(d.getDate()-day);return d}
+function monthKey(d=new Date()){return d.toISOString().slice(0,7)}
+
+const APPS={tiktok:{label:"TikTok",key:"tiktok_views",match:/tiktok/i},instagram:{label:"Reels",key:"instagram_views",match:/insta/i},youtube:{label:"Shorts",key:"youtube_views",match:/you/i}};
+let F={channel:"all",app:"all",series:"all"};
+try{F={...F,...JSON.parse(localStorage.getItem("studioFilter")||"{}")}}catch{}
+function saveF(){try{localStorage.setItem("studioFilter",JSON.stringify(F))}catch{}}
+function channels(){const c=settings?.channels;if(Array.isArray(c)&&c.length)return c;return [{id:"main",name:settings?.name||"Channel"}]}
+function seriesList(){const s=settings?.series;if(Array.isArray(s)&&s.length)return s;return (settings?.pillars||[]).map(p=>({id:p.key,name:p.label,channel:channels()[0].id,description:p.desc}))}
+const epChannel=e=>e.channel||channels()[0].id;
+const epSeries=e=>e.series||e.pillar||"";
+const seriesName=id=>(seriesList().find(s=>s.id===id)||{}).name||id||"—";
+function visible(){return episodes.filter(e=>(F.channel==="all"||epChannel(e)===F.channel)&&(F.series==="all"||epSeries(e)===F.series))}
+function renderFilters(){
+  const ch=channels(),fc=$("fChannel"),fs=$("fSeries"),fa=$("fApp");
+  if(F.channel!=="all"&&!ch.some(c=>c.id===F.channel))F.channel="all";
+  fc.innerHTML=(ch.length>1?`<option value="all">All channels</option>`:"")+ch.map(c=>`<option value="${esc(c.id)}">${esc(c.name)}</option>`).join("");
+  if(ch.length===1&&F.channel==="all")F.channel=ch[0].id;
+  fc.value=F.channel;fa.value=F.app;
+  const sl=seriesList().filter(s=>F.channel==="all"||(s.channel||ch[0].id)===F.channel);
+  if(F.series!=="all"&&!sl.some(s=>s.id===F.series))F.series="all";
+  fs.innerHTML=`<option value="all">All series</option>`+sl.map(s=>`<option value="${esc(s.id)}">${esc(s.name)}</option>`).join("");fs.value=F.series;
+  const inCh=episodes.filter(e=>F.channel==="all"||epChannel(e)===F.channel);
+  const chips=$("seriesChips");chips.textContent="";
+  for(const s of [{id:"all",name:"All series"},...sl]){const n=s.id==="all"?inCh.length:inCh.filter(e=>epSeries(e)===s.id).length;const b=document.createElement("button");b.type="button";b.className="pill"+(F.series===s.id?" good":"");b.style.cursor="pointer";b.textContent=`${s.name} · ${n}`;b.onclick=()=>{F.series=s.id;saveF();render()};chips.append(b)}
+  const cur=sl.find(s=>s.id===F.series);$("seriesDesc").textContent=cur?.description||"";
+}
+function renderAnalysis(){
+  const a=settings?.analysis,el=$("analysis");if(!a){return}
+  $("anaWhen").textContent=a.updated_at?`Updated ${fmtTime(a.updated_at)}${a.by?" by "+a.by:""}. The planner reads this before choosing stories.`:"";
+  const list=(t,xs)=>xs&&xs.length?`<h3>${esc(t)}</h3><ul>${xs.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`:"";
+  el.innerHTML=(a.headline?`<p style="font-size:1.05em"><b>${esc(a.headline)}</b></p>`:"")+list("Findings",a.findings)+list("What we'll do next",a.next_moves)+(a.caveat?`<p class="note">${esc(a.caveat)}</p>`:"");
+}
+document.addEventListener("change",ev=>{const id=ev.target.id;if(id==="fChannel"){F.channel=ev.target.value;F.series="all"}else if(id==="fApp")F.app=ev.target.value;else if(id==="fSeries")F.series=ev.target.value;else return;saveF();render()});
+
+function renderQueue(){
+  const order={awaiting_owner:-1,ready:0,produced:1,producing:2,approved:3,scripted:4,needs_rewrite:5,planned:6};
+  const NEXT={awaiting_owner:"Script passed the checker: approve it to generate",ready:"Ready: download and post",produced:"Video made, waiting for QA captions",producing:"Video being made",approved:"Script approved, waiting for the video producer",scripted:"Script waiting for the checker",needs_rewrite:"Script going back to the writer",planned:"Planned, not written yet"};
+  const items=visible().filter(e=>e.status in order).sort((a,b)=>order[a.status]-order[b.status]||(a.number||0)-(b.number||0)).slice(0,8);
+  const q=$("queue");q.textContent="";
+  if(!items.length){q.innerHTML=`<div class="empty">Nothing in the pipeline for this filter.</div>`;return}
+  items.forEach((e,i)=>{const b=document.createElement("button");b.type="button";b.className="qrow";
+    const sc=e.audit?.score!=null?` · audit ${e.audit.score}/10`:"";
+    b.innerHTML=`<span class="n">${i+1}</span><span><div class="t">${esc(e.title||e.story)}</div><div class="s">${esc(e.case||e.id)} · ${esc(seriesName(epSeries(e)))}${esc(sc)}</div></span><span class="pill ${STATUS_TONE[e.status]||""}">${esc(NEXT[e.status])}</span>`;
+    b.onclick=()=>openDrawer(e.id);q.append(b)});
+}
+function renderPosted(){
+  const ps=visible().filter(e=>e.status==="posted");const el=$("postedCards");
+  if(!ps.length){el.innerHTML=`<div class="empty">No posted videos match this filter.</div>`;return}
+  el.textContent="";
+  const days=e=>Math.max(1,(Date.now()-new Date(e.posted_at||e.ready_at||Date.now()))/864e5);
+  const max=Math.max(1,...ps.flatMap(e=>Object.values(APPS).map(a=>Number((e.performance||{})[a.key])||0)));
+  const perDay=e=>totalViews(e)/days(e);
+  const avg=ps.reduce((a,e)=>a+perDay(e),0)/ps.length;
+  for(const e of ps.sort((a,b)=>perDay(b)-perDay(a))){
+    const p=e.performance||{};const vals=Object.entries(APPS).map(([k,a])=>[a.label,Number(p[a.key])||0]);
+    const best=vals.reduce((x,y)=>y[1]>x[1]?y:x);const missing=vals.filter(v=>!v[1]).map(v=>v[0]);
+    const pd=perDay(e);const rel=pd>=avg*1.2?"Above your average":pd<=avg*0.8?"Below your average":"About average";
+    const b=document.createElement("button");b.type="button";b.className="pcard";
+    b.innerHTML=`<div class="case" style="font:500 11px var(--mono);color:var(--muted);display:flex;justify-content:space-between"><span>${esc(e.case||e.id)} · ${esc(seriesName(epSeries(e)))}</span><span>${Math.round(days(e))} day${Math.round(days(e))===1?"":"s"} live</span></div>
+      <div class="t" style="font:600 15px/1.25 var(--display)">${esc(e.title||e.story)}</div>
+      <div class="row" style="align-items:baseline;gap:14px"><span class="big">${num(totalViews(e))}</span><span class="note">views · ${num(Math.round(pd))}/day · ${esc(rel)}</span></div>
+      <div class="bars">${vals.map(([l,v])=>`<div class="bar"><span>${l}</span>${v?`<i style="width:${Math.max(3,v/max*100)}%"></i>`:`<i class="zero"></i>`}<span>${v?num(v):"–"}</span></div>`).join("")}</div>
+      <p class="note">Best on ${esc(best[0])}.${missing.length?` No views logged on ${esc(missing.join(" and "))}: post it there, or add the count.`:""}${e.qa?.virality_score!=null?` Predicted virality ${esc(e.qa.virality_score)}.`:""}</p>
+      ${p.updated_at?`<p class="note" style="font-size:11px">Views updated ${esc(fmtTime(p.updated_at))}</p>`:""}`;
+    b.onclick=()=>openDrawer(e.id);el.append(b);
+  }
+  const tot=ps.reduce((a,e)=>a+totalViews(e),0);$("postedNote").textContent=`${ps.length} videos · ${num(tot)} views · ${num(Math.round(avg))} views a day on average.`;
+}
+
+function render(){
+  renderFilters();renderAnalysis();renderQueue();renderPosted();
+  const ALL=episodes;
+  // KPIs
+  const ws=weekStart();
+  const thisWeek=episodes.filter(e=>e.produced_at&&new Date(e.produced_at)>=ws).length;
+  const cap=settings?.budget?.weekly_video_cap??3;
+  $("kWeek").textContent=`${thisWeek} / ${cap}`;
+  $("mWeek").style.width=Math.min(100,thisWeek/cap*100)+"%";
+  const mk=monthKey();
+  const spent=episodes.filter(e=>(e.produced_at||"").slice(0,7)===mk).reduce((a,e)=>a+(Number(e.credits_used)||0),0);
+  const budget=settings?.budget?.monthly_credit_budget??2000;
+  $("kCredits").textContent=`${num(spent)} / ${num(budget)}`;
+  const m=$("mCredits");m.style.width=Math.min(100,spent/budget*100)+"%";m.classList.toggle("over",spent>=budget);
+  $("kCreditsNote").textContent=spent>=budget?"Budget reached: production waits for next month":"Producer stops at the budget";
+  $("kReady").textContent=episodes.filter(e=>e.status==="ready").length;
+  const posted=episodes.filter(e=>e.status==="posted");
+  $("kPosted").textContent=posted.length;
+  const tv=posted.reduce((a,e)=>a+totalViews(e),0);
+  $("kViews").textContent=tv?`${num(tv)} views across platforms`:"Total views will show here";
+  const paused=!!settings?.paused;
+  $("pausedBanner").hidden=!paused;
+  const pb=$("pauseBtn");pb.disabled=!db||!canWrite||!settings;pb.textContent=paused?"Agents paused":"Pause agents";
+  if(paused)pb.disabled=true;
+
+  // Board
+  const board=$("board");board.textContent="";
+  for(const c of COLS){
+    const items=visible().filter(e=>c.match.includes(e.status)).sort((a,b)=>(a.number||0)-(b.number||0));
+    const col=document.createElement("div");col.className="col";
+    col.innerHTML=`<div class="col-h"><span>${esc(c.label)}</span><em>${items.length}</em></div>`;
+    if(!items.length){const em=document.createElement("div");em.className="empty";em.textContent=c.key==="planned"?"The planner adds next week's posts once a week.":"Nothing here yet.";col.append(em)}
+    for(const e of items){
+      const b=document.createElement("button");b.type="button";b.className="card";
+      const tone=STATUS_TONE[e.status]||"";
+      const score=e.audit?.score!=null?`<span class="pill ${e.audit.score>7?"good":"warn"}">Audit ${esc(e.audit.score)}/10</span>`:"";
+      b.innerHTML=`<div class="case"><span>${esc(e.case||e.id)}</span><span>${esc(lenLabel(e.length,false,e))}</span></div>
+        <div class="t">${esc(e.title||e.story)}</div>
+        ${e.hook?`<div class="hook">“${esc(e.hook)}”</div>`:""}
+        <div class="pills"><span class="pill ${tone}">${esc(STATUS_TEXT[e.status]||e.status)}</span>${score}<span class="pill">${esc(seriesName(epSeries(e)))}</span>${e.story_type?`<span class="pill">${esc(e.story_type)}</span>`:""}</div>
+        ${["ready","posted"].includes(e.status)?`<div class="pills"><span class="pill ${e.video_url?"good":"bad"}">Video ${e.video_url?"✓":"missing"}</span><span class="pill ${e.thumbnail_url?"good":"bad"}">Thumbnail ${e.thumbnail_url?"✓":"missing"}</span><span class="pill ${e.captions?"good":"bad"}">Captions ${e.captions?"✓":"missing"}</span></div>`:""}`;
+      b.addEventListener("click",()=>openDrawer(e.id));
+      col.append(b);
+    }
+    board.append(col);
+  }
+
+  // Profiles
+  const chObj=channels().find(c=>c.id===F.channel);
+  const pr=(chObj&&chObj.profiles)||settings?.profiles;const pw=$("profiles");
+  if(pr&&Array.isArray(pr.apps)){
+    pw.textContent="";
+    pr.apps.forEach((a,ai)=>{
+      if(F.app!=="all"&&!APPS[F.app].match.test(a.app||""))return;
+      const card=document.createElement("div");card.className="prof";
+      const fields=[["Username",a.username,true],["Display name",a.display_name],["Bio",a.bio],["Link in bio",a.link]].filter(f=>f[1]);
+      card.innerHTML=`<h3>${esc(a.app)}</h3>`+fields.map((f,fi)=>{const len=String(f[1]).length;const lim=f[0]==="Bio"&&a.bio_limit?` · ${len}/${a.bio_limit} characters`:"";return `<div class="pf"><div class="lbl"><span>${esc(f[0])}</span><button type="button" data-pcopy="${ai}-${fi}">Copy</button></div><p class="${f[2]?"handle":""}">${esc(f[1])}</p>${lim?`<small>${esc(lim.slice(3))}</small>`:""}</div>`}).join("")+(a.note?`<p class="note">${esc(a.note)}</p>`:"");
+      card.querySelectorAll("[data-pcopy]").forEach(b=>{const [x,y]=b.dataset.pcopy.split("-").map(Number);const val=String(fields[y][1]);b.onclick=async()=>{try{await navigator.clipboard.writeText(val);toast("Copied")}catch{const p=b.closest(".pf").querySelector("p");const r=document.createRange();r.selectNodeContents(p);const sl=getSelection();sl.removeAllRanges();sl.addRange(r);toast("Selected: press copy")}}});
+      pw.append(card);
+    });
+  }
+
+  // Story series: stakes, canon, cameo queue
+  const story=settings?.story; const isStory=settings?.format==="series";
+  $("storySec").hidden=!isStory; $("cameoSec").hidden=!isStory;
+  if(isStory&&story){
+    const sk=$("stakes");sk.textContent="";
+    for(const [k,v] of Object.entries(story.stakes||{})){const d=document.createElement("div");d.className="kpi";const val=Number(v.value)||0;d.innerHTML=`<span class="eyebrow">${esc(v.label||k)}</span><b>${val}%</b><div class="meter"><i style="width:${Math.min(100,val)}%" class="${k==="suspicion"&&val>=70?"over":""}"></i></div>`;sk.append(d)}
+    const pos=story.position||{};const d0=document.createElement("div");d0.className="kpi";d0.innerHTML=`<span class="eyebrow">Season ${esc(story.season?.number||1)}</span><b>Part ${esc(pos.part||0)}</b><small>${esc(story.season?.status==="ended"?"Season over":pos.node?"At "+pos.node:"Not started")}</small>`;sk.append(d0);
+    const cn=$("canon");cn.textContent="";
+    const can=story.canon||[];
+    if(!can.length)cn.innerHTML=`<div><b>Nothing decided yet</b><span>${esc(story.premise||"")}</span></div>`;
+    for(const c of can){const d=document.createElement("div");d.innerHTML=`<b>Part ${esc(c.part)} · ${esc(c.title||"")}</b><span>${esc(c.happened||"")} <b style="color:var(--ink)">${esc(c.result||"")}</b></span>`;cn.append(d)}
+    const cl=$("cameoList");
+    if(cameos.length){cl.textContent="";const CS={queued:"Waiting for a part",scheduled:"Scheduled",featured:"Featured"};
+      for(const c of [...cameos].sort((a,b)=>String(a.created_at).localeCompare(String(b.created_at)))){const ep=c.post_id?episodes.find(x=>x.id===c.post_id):null;const d=document.createElement("div");d.innerHTML=`<b>${esc(c.handle)}${c.tier==="business"?" · business":""}</b><span>${esc(CS[c.status]||c.status)}${ep?` · ${esc(ep.title||ep.id)}`:""}${c.placement?` · ${esc(c.placement)}`:""}</span>`;cl.append(d)}}
+  }
+  // Requests
+  const rl=$("reqList");
+  if(requests.length){
+    rl.textContent="";
+    const RQ={new:"Waiting for the planner",planned:"Planned",skipped:"Skipped"};
+    for(const r of [...requests].sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at)))){
+      const ep=(r.post_id||r.episode_id)?episodes.find(x=>x.id===(r.post_id||r.episode_id)):null;
+      const st=ep?(STATUS_TEXT[ep.status]||ep.status):(RQ[r.status]||r.status);
+      const reply=ep&&["ready","posted"].includes(ep.status)&&r.who&&!r.replied;
+      const d=document.createElement("div");
+      d.innerHTML=`<b>${esc(r.topic||r.company)}${r.who?` · asked by ${esc(r.who)} on ${esc(r.app||"")}`:""}</b><span>${esc(st)}${ep?` · ${esc(ep.case||ep.id)}`:""}${r.reason?` · ${esc(r.reason)}`:""}</span>${reply?`<span style="color:var(--ink)"><b>Reply to ${esc(r.who)}'s comment with this video.</b> <button type="button" data-replied="${esc(r.id)}">Done</button></span>`:""}`;
+      rl.append(d);
+    }
+    rl.querySelectorAll("[data-replied]").forEach(b=>b.onclick=async()=>{try{await db.doc("requests/"+b.dataset.replied).update({replied:true});toast("Marked as replied")}catch{toast("Couldn't save. Try again.")}});
+  }
+
+  // Performance
+  const pbody=$("perfBody");pbody.textContent="";
+  const vposted=visible().filter(e=>e.status==="posted");
+  const cols=F.app==="all"?Object.keys(APPS):[F.app];
+  $("perfHead").innerHTML=`<th>Post</th><th>Title</th><th>Series</th>${cols.map(k=>`<th class="num">${APPS[k].label}</th>`).join("")}${F.app==="all"?`<th class="num">Total</th>`:""}`;
+  const val=e=>F.app==="all"?totalViews(e):Number((e.performance||{})[APPS[F.app].key])||0;
+  if(!vposted.length){pbody.innerHTML=`<tr><td colspan="${cols.length+4}" class="note">No posted videos match this filter.</td></tr>`}
+  for(const e of vposted.sort((a,b)=>val(b)-val(a))){
+    const p=e.performance||{};
+    const tr=document.createElement("tr");
+    tr.innerHTML=`<td>${esc(e.case||e.id)}</td><td>${esc(e.title||e.story)}</td><td>${esc(seriesName(epSeries(e)))}</td>${cols.map(k=>`<td class="num">${num(p[APPS[k].key])}</td>`).join("")}${F.app==="all"?`<td class="num"><b>${num(totalViews(e))}</b></td>`:""}`;
+    tr.style.cursor="pointer";tr.onclick=()=>openDrawer(e.id);
+    pbody.append(tr);
+  }
+
+  // Log
+  const entries=runs.flatMap(r=>(r.entries||[]).map(x=>({...x,agent:r.agent||r.id}))).sort((a,b)=>String(b.at).localeCompare(String(a.at))).slice(0,30);
+  if(entries.length){const lg=$("log");lg.textContent="";for(const x of entries){const d=document.createElement("div");d.innerHTML=`<b>${esc(x.agent)} · ${esc(fmtTime(x.at))}</b><span>${esc(x.summary)}</span>`;lg.append(d)}}
+
+  if(openId)openDrawer(openId,true);
+}
+function lenLabel(l,full,e){const s=e?.seconds||e?.length_s;const f=e?.format;return s?(full?`${f?f+" · ":""}${s} s`:`${s}s`):(f||"")}
+const PILLAR={};
+function refsHtml(e){
+  const cites=e.citations||[];const srcs=e.sources||[];
+  if(!cites.length&&!srcs.length)return "";
+  const order=[];const by={};
+  for(const c of cites){if(!by[c.source]){by[c.source]={lines:new Set(),quotes:[]};order.push(c.source)}by[c.source].lines.add(c.block);if(c.quote)by[c.source].quotes.push(c.quote)}
+  for(const s of srcs){if(!by[s]){by[s]={lines:new Set(),quotes:[]};order.push(s)}}
+  const host=u=>{try{return new URL(u).hostname.replace(/^www\./,"")}catch{return u}};
+  const items=order.map((u,n)=>{const r=by[u];const lines=[...r.lines].sort((a,b)=>a-b);return `<li><a href="${esc(u)}" target="_blank" rel="noopener">${esc(host(u))}</a>${lines.length?` <span class="note">· supports line${lines.length>1?"s":""} ${esc(lines.join(", "))}</span>`:""}${r.quotes.length?`<div class="note" style="margin-top:2px">${r.quotes.map(q=>"“"+esc(q)+"”").join("<br>")}</div>`:""}<div class="note" style="word-break:break-all;font-size:11px">${esc(u)}</div></li>`}).join("");
+  return `<div class="sec refs"><h3>References</h3>${e.fact_check?`<p class="note">${esc(e.fact_check.notes||"")}</p>`:""}${e.audit?.citations_verified?`<p class="note">Auditor verified ${esc(e.audit.citations_verified)} citations.</p>`:""}<ol>${items}</ol></div>`;
+}
+function totalViews(e){const p=e.performance||{};return (Number(p.tiktok_views)||0)+(Number(p.instagram_views)||0)+(Number(p.youtube_views)||0)}
+function fmtTime(s){const d=new Date(s);return isNaN(d)?String(s||""):d.toLocaleString("en-AU",{weekday:"short",day:"numeric",month:"short",hour:"numeric",minute:"2-digit"})}
+
+function openDrawer(id,refresh){
+  const e=episodes.find(x=>x.id===id);if(!e){closeDrawer();return}
+  // keep form edits if refreshing while typing
+  if(refresh&&$("drawer").contains(document.activeElement)&&document.activeElement.tagName==="INPUT")return;
+  openId=id;const d=$("drawer");
+  const caps=e.captions||{};
+  const asText=v=>Array.isArray(v)?v.join(" "):String(v??"");
+  const field=(k,sub)=>{const v=caps[k];if(v==null)return "";if(typeof v==="string")return sub==="caption"?v:"";return asText(v[sub])};
+  copyStore={};
+  const platform=(k,label)=>{
+    const c=field(k,"caption"),h=field(k,"hashtags"),t=field(k,"title");
+    if(!c&&!h&&!t)return "";
+    const block=(id,name,val)=>{if(!val)return "";copyStore[id]=val;return `<div class="cap"><header><b>${name}</b><button type="button" data-copy="${id}">Copy</button></header><p>${esc(val)}</p></div>`};
+    const both=[c,h].filter(Boolean).join("\n\n");copyStore[k+"-all"]=both;
+    return `<div class="sec"><div class="row" style="justify-content:space-between"><h3>${label}</h3>${c&&h?`<button type="button" data-copy="${k}-all">Copy caption + hashtags</button>`:""}</div>${block(k+"-title","Title",t)}${block(k+"-caption","Caption",c)}${block(k+"-tags","Hashtags",h)}</div>`;
+  };
+  const cuts=e.cuts||{};
+  const cutOf=k=>cuts[k]||(k==="full"&&(e.video_url||e.thumbnail_url)?{video_url:e.video_url,clean_video_url:e.clean_video_url,thumbnail_url:e.thumbnail_url,seconds:e.seconds}:null);
+  const kitBtns=(k,fileBase)=>{const c=cutOf(k);if(!c)return `<div class="kitgrid"><div class="kitbtn off"><b>Video</b><span>Not made yet</span></div><div class="kitbtn off"><b>Thumbnail</b><span>Not made yet</span></div></div>`;
+    return `<div class="kitgrid">${c.video_url?`<a class="kitbtn" href="${esc(c.video_url)}" target="_blank" rel="noopener"><b>Video${c.seconds?` · ${esc(c.seconds)}s`:""}</b><span>Save as ${esc(fileBase)}.mp4</span></a>`:`<div class="kitbtn off"><b>Video</b><span>Missing</span></div>`}${c.clean_video_url?`<a class="kitbtn" href="${esc(c.clean_video_url)}" target="_blank" rel="noopener" style="background:var(--chip);color:var(--ink)"><b>No subtitles</b><span>For your own captions in CapCut</span></a>`:""}${c.thumbnail_url?`<a class="kitbtn" href="${esc(c.thumbnail_url)}" target="_blank" rel="noopener"><b>Thumbnail</b><span>Save as ${esc(fileBase)}-thumb.png</span></a>`:`<div class="kitbtn off"><b>Thumbnail</b><span>Missing</span></div>`}</div>`};
+  const cs=e.case||e.id;
+  const dest=(title,sub,cutKey,capKey,fileBase)=>`<div class="sec kit"><div class="row" style="justify-content:space-between;align-items:baseline"><h3 style="color:var(--ink)">${title}</h3><span class="note">${sub}</span></div>${kitBtns(cutKey,fileBase)}${platform(capKey,"")}</div>`;
+  const madeAny=cutOf("full")||cutOf("part1");
+  const kit=madeAny?`
+    ${dest("TikTok","Full video","full","tiktok",cs+"-full")}
+    ${dest("YouTube Shorts","Full video","full","youtube",cs+"-full")}
+    ${cuts.part1?dest("Instagram Reels · Part 1","Post first","part1","instagram",cs+"-part1")+dest("Instagram Reels · Part 2","Post the next day","part2","instagram_part2",cs+"-part2"):dest("Instagram Reels","Same video","full","instagram",cs+"-full")}
+    <p class="note">Each button opens the file in a new tab. On a phone, long-press or use Share and choose Save; on a computer, right-click and Save as. Turn on each app's AI-generated content label when you upload.</p>`:"";
+  const hasCaps=false;
+  const a=e.audit;
+  d.innerHTML=`
+    <div class="row" style="justify-content:space-between"><span class="eyebrow">${esc(e.case||e.id)} · ${esc(e.story_type||"")}</span><button type="button" id="closeD">Close</button></div>
+    <div class="sec"><h2 id="dTitle">${esc(e.title||e.story)}</h2>${e.hook?`<p style="margin:0;font-size:17px">“${esc(e.hook)}”</p>`:""}
+      <div class="row"><span class="stampmark">${esc(STATUS_TEXT[e.status]||e.status)}</span><span class="pill">${esc(lenLabel(e.length,true,e))}</span>${e.credits_used?`<span class="pill">${num(e.credits_used)} credits</span>`:""}</div></div>
+    ${e.error?`<div class="banner"><span><b>Problem:</b> ${esc(e.error)}</span></div>`:""}
+    ${(e.requested_by||[]).length?`<div class="sec kit"><h3 style="color:var(--ink)">Viewer request</h3><p class="note" style="color:var(--ink)">Asked for by ${esc(e.requested_by.map(r=>(r.who||"a viewer")+(r.app?" on "+r.app:"")).join(", "))}. Reply to their comment with this video.</p>${e.reply_comment?(copyStore["reply"]=e.reply_comment,`<div class="cap"><header><b>Reply text</b><button type="button" data-copy="reply">Copy</button></header><p>${esc(e.reply_comment)}</p></div>`):""}</div>`:""}
+    ${kit}
+    ${hasCaps?`${platform("tiktok","TikTok")}${platform("instagram","Instagram Reels")}${platform("youtube","YouTube Shorts")}<p class="note">Turn on each app's AI-generated content label when you upload.</p>`:(["ready","posted"].includes(e.status)?"":`<p class="note">The download kit, captions and hashtags appear here once the videos are made and checked.</p>`)}
+    ${a?`<div class="sec"><h3>Script audit</h3><div class="pills">${["hook","voice","value","retention","producibility","loop"].filter(k=>a[k]!=null).map(k=>`<span class="pill">${k} ${esc(a[k])}/10</span>`).join("")}<span class="pill ${a.score>7?"good":"warn"}">Overall ${esc(a.score)}/10</span></div>${a.notes?`<p class="note" style="color:var(--ink)">${esc(a.notes)}</p>`:""}</div>`:""}
+    ${e.qa?`<div class="sec"><h3>Video QA</h3><p class="note" style="color:var(--ink)">${esc(e.qa.notes||"")}</p></div>`:""}
+    ${e.status==="awaiting_owner"?`<div class="sec kit"><h3 style="color:var(--ink)">Your OK</h3><p class="note" style="color:var(--ink)">Nothing is generated until you approve. Read the script below first.</p><label>Note for the writer (if sending back)<textarea id="ownerNote" placeholder="e.g. make the hook meaner, drop the last line"></textarea></label><div class="row"><button type="button" class="primary" id="ownerOk" ${canWrite?"":"disabled"}>Approve script</button><button type="button" id="ownerBack" ${canWrite?"":"disabled"}>Send back with note</button></div></div>`:""}
+    ${e.script?`<div class="sec"><h3>Script</h3><div class="script">${esc(e.script)}</div></div>`:""}
+    ${(e.video_prompts||[]).length?`<div class="sec"><h3>Video prompts (${e.video_prompts.length})</h3>${e.video_prompts.map((p,i)=>(copyStore["vp"+i]=p.prompt,`<div class="cap"><header><b>Part ${esc(p.part||i+1)} · ${esc(p.format||"")} · ${esc(p.duration_s||"")}s</b><button type="button" data-copy="vp${i}">Copy</button></header><p style="font-size:12px;max-height:180px;overflow:auto">${esc(p.prompt)}</p></div>`)).join("")}</div>`:""}
+    ${e.connectors?`<div class="sec" hidden><h3>Instagram split</h3><p class="note">Part 1 = lines 1–${esc(e.split_after)} + cliffhanger. Part 2 = recap + lines ${esc((Number(e.split_after)||0)+1)}–end.</p><div class="script"><b>Cliffhanger (ends Part 1):</b> ${esc(e.connectors.cliffhanger?.text||"")}
+
+<b>Recap (opens Part 2):</b> ${esc(e.connectors.recap?.text||"")}</div></div>`:""}
+    ${e.hold?`<div class="sec"><h3>Why they stay</h3><p class="note" style="color:var(--ink)">${esc(e.hold)}</p></div>`:""}
+    ${e.angle?`<div class="sec"><h3>Planner's angle</h3><p class="note" style="color:var(--ink)">${esc(e.angle)}</p></div>`:""}
+    ${["ready","posted"].includes(e.status)?`<div class="sec"><h3>${e.status==="posted"?"Views so far":"After you post"}</h3>
+      <div class="grid3">
+        <label>TikTok views<input id="vTik" inputmode="numeric" value="${esc(e.performance?.tiktok_views??"")}"></label>
+        <label>Reels views<input id="vIg" inputmode="numeric" value="${esc(e.performance?.instagram_views??"")}"></label>
+        <label>Shorts views<input id="vYt" inputmode="numeric" value="${esc(e.performance?.youtube_views??"")}"></label>
+      </div>
+      <div class="row">${e.status==="ready"?`<button type="button" class="primary" id="markPosted" ${canWrite?"":"disabled"}>Mark as posted</button>`:""}<button type="button" id="saveViews" ${canWrite?"":"disabled"}>Save views</button></div></div>`:""}
+    ${e.choice&&["ready","posted"].includes(e.status)?`<div class="sec kit"><h3 style="color:var(--ink)">The vote</h3><p class="note" style="color:var(--ink)">${esc(e.choice.text)} Count the A / B${(e.choice.options||[]).length>2?" / C":""} comments on each app and type the totals. The Showrunner closes the vote at ${esc(settings?.story?.vote?.closes_text||"its next run")}.</p>
+      ${e.vote?.closed_at?`<p><b>Closed:</b> ${esc(e.vote.winner)} won · ${(e.choice.options||[]).map(o=>`${esc(o.key)} ${esc(o.label)}: ${esc(e.vote.pct?.[o.key]??"–")}%`).join(" · ")}</p>`:`<div class="grid3">${(e.choice.options||[]).map(o=>`<label>${esc(o.key)} · ${esc(o.label)}<input data-vote="${esc(o.key)}" inputmode="numeric" value="${esc(e.vote?.counts?.[o.key]??"")}"></label>`).join("")}</div><div class="row"><button type="button" id="saveVotes" class="primary" ${canWrite?"":"disabled"}>Save vote counts</button></div>`}</div>`:""}
+    ${(e.cameos||[]).length?`<div class="sec"><h3>Cameos in this part</h3><p class="note" style="color:var(--ink)">${e.cameos.map(c=>esc(c.handle)+" · "+esc(c.placement||"")).join("<br>")}</p></div>`:""}
+    ${["failed","needs_rewrite"].includes(e.status)?`<div class="row"><button type="button" id="retry" ${canWrite?"":"disabled"}>${e.status==="failed"?"Send back to production":"Send back to the writer"}</button></div>`:""}
+    <div class="row"><button type="button" class="danger" id="shelve" ${canWrite?"":"disabled"}>Shelve this post</button></div>
+    ${refsHtml(e)}
+  `;
+  d.hidden=false;$("scrim").hidden=false;
+  $("closeD").onclick=closeDrawer;
+  d.querySelectorAll("[data-copy]").forEach(b=>b.onclick=async()=>{const t=copyStore[b.dataset.copy]||"";try{await navigator.clipboard.writeText(t);toast("Copied")}catch{const box=b.closest(".cap");const p=box?box.querySelector("p"):null;if(p){const r=document.createRange();r.selectNodeContents(p);const s=getSelection();s.removeAllRanges();s.addRange(r);toast("Selected: press copy")}else toast("Copy each part separately")}});
+  const views=()=>({tiktok_views:Number($("vTik").value.replace(/\D/g,""))||0,instagram_views:Number($("vIg").value.replace(/\D/g,""))||0,youtube_views:Number($("vYt").value.replace(/\D/g,""))||0,updated_at:new Date().toISOString()});
+  if($("markPosted"))$("markPosted").onclick=()=>write(e.id,{status:"posted",posted_at:new Date().toISOString(),performance:views()},"Marked as posted");
+  if($("saveViews"))$("saveViews").onclick=()=>write(e.id,{performance:views()},"Views saved");
+  if($("ownerOk"))$("ownerOk").onclick=()=>write(e.id,{status:"approved",approved_at:new Date().toISOString(),approved_by:"owner"},"Approved: the producer picks it up next run");
+  if($("ownerBack"))$("ownerBack").onclick=()=>{const n=$("ownerNote").value.trim();if(!n){toast("Add a note for the writer first");return}write(e.id,{status:"needs_rewrite",owner_note:n,rewrite_count:(Number(e.rewrite_count)||0)+1},"Sent back to the writer")};
+  if($("saveVotes"))$("saveVotes").onclick=()=>{const counts={};d.querySelectorAll("[data-vote]").forEach(i=>counts[i.dataset.vote]=Number(i.value.replace(/\D/g,""))||0);write(e.id,{vote:{...(e.vote||{}),counts,counted_at:new Date().toISOString()}},"Vote counts saved")};
+  if($("retry"))$("retry").onclick=()=>write(e.id,{status:e.status==="failed"?"approved":"planned",error:null},"Sent back");
+  $("shelve").onclick=()=>{const b=$("shelve");if(b.dataset.armed){write(e.id,{status:"shelved"},"Post shelved");closeDrawer()}else{b.dataset.armed="1";b.textContent="Tap again to shelve"}};
+}
+function closeDrawer(){openId=null;$("drawer").hidden=true;$("scrim").hidden=true}
+$("scrim").onclick=closeDrawer;
+document.addEventListener("keydown",e=>{if(e.key==="Escape"&&openId)closeDrawer()});
+
+async function write(id,data,msg){
+  try{await db.doc("posts/"+id).update(data);toast(msg)}
+  catch(err){if(err?.code==="invalid_argument"){canWrite=false;render();toast("You can view this tracker but not change it")}else toast("Couldn't save. Try again in a moment.")}
+}
+async function setPaused(v){
+  try{await db.doc("settings/channel").update({paused:v,paused_changed_at:new Date().toISOString()});toast(v?"Agents paused":"Agents resumed")}
+  catch{toast("Couldn't change the switch. Try again.")}
+}
+$("rqAdd").onclick=async()=>{
+  const company=$("rqCompany").value.trim();if(!company){toast("Type a topic first");return}
+  if(!db){toast("Not connected yet");return}
+  let who=$("rqWho").value.trim();if(who&&!who.startsWith("@"))who="@"+who;
+  const id="rq-"+Date.now().toString(36);
+  try{await db.doc("requests/"+id).set({topic:company,who,app:$("rqApp").value,status:"new",created_at:new Date().toISOString()});$("rqCompany").value="";$("rqWho").value="";toast("Request added")}
+  catch(err){toast(err?.code==="invalid_argument"?"You can view this tracker but not change it":"Couldn't save. Try again.")}
+};
+$("cmAdd").onclick=async()=>{
+  let h=$("cmHandle").value.trim().replace(/\s+/g,"");if(!h){toast("Type the buyer's handle");return}
+  if(!h.startsWith("@"))h="@"+h; if(!/^@[A-Za-z0-9._]{1,30}$/.test(h)){toast("That doesn't look like a handle");return}
+  if(!db){toast("Not connected yet");return}
+  try{await db.doc("cameos/c-"+Date.now().toString(36)).set({handle:h,tier:$("cmTier").value,order_ref:$("cmRef").value.trim(),status:"queued",created_at:new Date().toISOString()});$("cmHandle").value="";$("cmRef").value="";toast("Cameo queued")}
+  catch(err){toast(err?.code==="invalid_argument"?"You can view this tracker but not change it":"Couldn't save. Try again.")}
+};
+$("pauseBtn").onclick=()=>setPaused(true);
+$("resumeBtn").onclick=()=>setPaused(false);
+
+(async()=>{
+  render();
+  db=await claude.use("db");
+  const user=await claude.use("user");
+  if(!db){$("statusPill").textContent="Offline view";$("statusPill").className="pill warn";return}
+  const cw=user?await user.can("data.write"):null; if(cw===false)canWrite=false;
+  $("statusPill").textContent="Live";$("statusPill").className="pill good";
+  db.collection("posts").onSnapshot(s=>{episodes=s.docs.map(d=>({id:d.id,...d.data()})).filter(e=>e.status!=="shelved");render()},()=>{$("statusPill").textContent="Disconnected";$("statusPill").className="pill bad"});
+  db.doc("settings/channel").onSnapshot(s=>{settings=s.exists?s.data():null;if(settings?.name){const h=$("brandName");h.textContent=settings.name+" ";const sp=document.createElement("span");sp.textContent=settings.handle||"";sp.style.fontSize=".45em";h.append(sp);document.title=settings.name+" · Studio";$("eyebrow").textContent=(settings.tagline||"Faceless Studio")+" · production office"}render()});
+  db.collection("runs").onSnapshot(s=>{runs=s.docs.map(d=>({id:d.id,...d.data()}));render()});
+  db.collection("requests").onSnapshot(s=>{requests=s.docs.map(d=>({id:d.id,...d.data()}));render()});
+  db.collection("cameos").onSnapshot(s=>{cameos=s.docs.map(d=>({id:d.id,...d.data()}));render()});
+})();
+</script>

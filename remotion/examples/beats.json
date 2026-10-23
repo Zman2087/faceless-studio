@@ -1,0 +1,13 @@
+{
+  "theme": { "bg": "#0B1530", "accent": "#F2B544" },
+  "audio": "assets/stand-in-voice.mp3",
+  "watermark": "@yourhandle",
+  "hook": { "text": "This habit costs $1,400", "highlight": "$1,400" },
+  "cta": { "text": "Follow for the fix" },
+  "beats": [
+    { "say": "This habit costs you $1,400 a year.", "shot": { "type": "media", "src": "assets/stand-in-photo.jpg", "label": "your morning" } },
+    { "say": "Here's the maths.", "shot": { "type": "number", "value": 1400, "prefix": "$", "caption": "a year on takeaway coffee", "color": "danger", "transition": "zoom" } },
+    { "say": "Five coffees a week, fifty-two weeks.", "shot": { "type": "bars", "title": "Where it goes", "items": [ { "label": "Coffee", "value": 1400, "color": "danger" }, { "label": "Gym", "value": 900 } ], "transition": "slide" } },
+    { "say": "Small leak. Big bucket.", "shot": { "type": "kinetic", "text": "Small leak. Big bucket.", "highlight": "Big bucket.", "transition": "cut" } }
+  ]
+}

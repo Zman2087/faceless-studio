@@ -1,0 +1,6 @@
+{
+  "mcpServers": {
+    "higgsfield": { "type": "http", "url": "https://mcp.higgsfield.ai/mcp" },
+    "elevenlabs": { "type": "http", "url": "https://api.elevenlabs.io/v1/mcp" }
+  }
+}

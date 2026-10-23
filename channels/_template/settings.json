@@ -1,0 +1,94 @@
+{
+  "name": "{{NAME}}",
+  "short": "{{SHORT}}",
+  "handle": "{{HANDLE}}",
+  "tagline": "{{TAGLINE}}",
+  "format": "{{FORMAT}}",
+  "timezone": "{{TIMEZONE}}",
+  "paused": false,
+  "approval_mode": "auto",
+  "platforms": ["TikTok", "Instagram Reels", "YouTube Shorts"],
+  "cadence": { "per_week": 5, "note": "One video a day on weekdays, posted by hand the same evening to every app." },
+
+  "character": {
+    "summary": "{{CHARACTER_SUMMARY}}",
+    "age": "{{AGE}}",
+    "backstory": "{{BACKSTORY}}",
+    "anchors": "{{IDENTITY_ANCHORS: face shape, hair, eyes, skin, build, signature jewellery — copied verbatim into every video prompt}}",
+    "outfits": ["{{OUTFIT_1}}"],
+    "sheet": { "job_id": "", "media_url": "", "note": "3-panel Soul 2.0 character card (charsheet-soul skill)" },
+    "face_anchor": { "job_id": "", "media_url": "", "note": "Soul Cinema close-up, never regenerated" },
+    "location_stills": [ { "key": "home", "description": "{{MAIN_LOCATION}}", "job_id": "", "media_url": "" } ],
+    "image_quality": "clean modern flagship phone"
+  },
+
+  "voice": {
+    "provider": "higgsfield",
+    "voice_id": "",
+    "voice_type": "preset",
+    "name": "",
+    "delivery": "{{VOICE_DELIVERY: e.g. warm, unhurried, dry; Australian accent}}",
+    "fallback": { "provider": "higgsfield", "voice_id": "", "voice_type": "preset" }
+  },
+  "video": { "model": "seedance", "max_seconds_per_generation": 30 },
+
+  "writing_voice": "{{WRITING_VOICE: how they talk — sentence length, pet phrases, what they never say}}",
+  "niche": "{{NICHE}}",
+  "audience": "{{AUDIENCE}}",
+  "cta_style": "One soft line at most, in character (e.g. 'Part two tomorrow.'). Never beg for likes.",
+  "pillars": [
+    { "key": "{{PILLAR_1_KEY}}", "label": "{{PILLAR_1}}", "share": 0.4, "desc": "" },
+    { "key": "{{PILLAR_2_KEY}}", "label": "{{PILLAR_2}}", "share": 0.35, "desc": "" },
+    { "key": "{{PILLAR_3_KEY}}", "label": "{{PILLAR_3}}", "share": 0.25, "desc": "" }
+  ],
+  "series": [],
+  "hook_formulas": [
+    "Direct callout: 'If you're [specific viewer], stop scrolling.'",
+    "Specific number + stakes: 'I lost 3 years to one bad habit.'",
+    "Contrarian: 'Everyone says X. They're wrong.'",
+    "Confession / storytime: 'Nobody knows I did this.'",
+    "POV: 'POV: you just [moment the audience recognises].'"
+  ],
+  "script_rules": [
+    "15-40 seconds total; a single talking take is at most 28 seconds of speech.",
+    "First spoken line is the hook: 8 words or fewer, no greeting.",
+    "Every line earns the next; the last line pays off the hold and loops to the hook.",
+    "Write in the character's voice, never neutral copywriter voice.",
+    "Facts only from sources the checker can open; storytime from the fictional backstory needs none."
+  ],
+  "safety_rules": [
+    "The character is fictional and never claims real credentials.",
+    "No financial, medical or legal advice; general information only.",
+    "No likeness of a real person; no real brand logos; no fake reviews or testimonials.",
+    "Turn on each platform's AI-generated content label when posting."
+  ],
+  "brand": { "bg": "#0B1530", "text": "#FFFFFF", "muted": "#A9BCE0", "accent": "{{ACCENT}}", "danger": "#E5484D", "good": "#3CCB7F", "font": "Montserrat" },
+  "hashtags": { "brand": "{{BRAND_TAG}}", "niche": [] },
+  "profiles": { "apps": [
+    { "app": "TikTok", "username": "{{HANDLE}}", "display_name": "{{NAME}}", "bio": "", "bio_limit": 80 },
+    { "app": "Instagram", "username": "{{HANDLE}}", "display_name": "{{NAME}}", "bio": "", "bio_limit": 150 },
+    { "app": "YouTube", "username": "{{HANDLE}}", "display_name": "{{NAME}}", "bio": "", "bio_limit": 1000 }
+  ] },
+
+  "budget": {
+    "weekly_video_cap": 5,
+    "monthly_credit_budget": 2000,
+    "max_credits_per_post": 200,
+    "min_balance_reserve": 300,
+    "est_credits_per_clip": 60,
+    "est_credits_voice": 5
+  },
+  "audit_pass_score": 7.1,
+  "max_rewrites": 6,
+
+  "trend_scout": {
+    "queries": ["{{NICHE}} shorts", "{{NICHE}} tips", "{{NICHE}} storytime"],
+    "competitors": [],
+    "min_views": 50000,
+    "max_duration_s": 70,
+    "how": "Runs inside the Higgsfield sandbox (open internet) with yt_dlp: titles, views and lengths only."
+  },
+  "instagram_competitors": [],
+  "monetisation": { "stage": "grow first", "products": [], "affiliate": [] },
+  "remotion": { "repo_url": "{{REPO_URL}}", "spec_doc": "remotion/SPEC.md" }
+}

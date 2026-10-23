@@ -1,0 +1,18 @@
+{
+  "duration": 8,
+  "theme": { "accent": "#FF5C8A" },
+  "words": [
+    {"w":"Nobody","s":0.2,"e":0.6},{"w":"tells","s":0.6,"e":0.9},{"w":"you","s":0.9,"e":1.05},{"w":"this","s":1.05,"e":1.3},
+    {"w":"about","s":1.3,"e":1.55},{"w":"your","s":1.55,"e":1.75},{"w":"first","s":1.75,"e":2.1},{"w":"year.","s":2.1,"e":2.6},
+    {"w":"It","s":3.2,"e":3.35},{"w":"gets","s":3.35,"e":3.6},{"w":"quieter","s":3.6,"e":4.1},{"w":"before","s":4.1,"e":4.5},
+    {"w":"it","s":4.5,"e":4.6},{"w":"gets","s":4.6,"e":4.85},{"w":"better.","s":4.85,"e":5.5}
+  ],
+  "shots": [
+    { "at": 0, "type": "media", "src": "assets/stand-in-clip.mp4", "muted": false, "kenburns": false }
+  ],
+  "overlays": [
+    { "at": 0, "end": 2.8, "type": "headline", "text": "The first year nobody warns you about", "highlight": "first year", "y": 220 },
+    { "at": 5.8, "end": 8, "type": "lowerthird", "text": "Follow for part 2", "sub": "Day 1 of starting over" }
+  ],
+  "watermark": "@yourcharacter"
+}

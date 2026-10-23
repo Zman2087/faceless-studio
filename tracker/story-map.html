@@ -1,0 +1,212 @@
+<title>Story Map</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Big+Shoulders+Display:wght@700;900&family=Public+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* Layout: an evidence board. Case header, a "play it" lane, then every scene as an evidence tag grouped by act, then the endings. */
+:root{
+  --board:#e7e1d4; --tag:#fbf9f4; --ink:#17181b; --muted:#5d5b55; --rule:#cfc7b6;
+  --tape:#f2c230; --tape-ink:#17181b; --red:#b3261e; --red-soft:#f5dcd8; --green:#2e6b47; --green-soft:#dcebe0; --link:#0f4f8a;
+  --display:"Big Shoulders Display",Impact,"Arial Narrow",sans-serif;
+  --body:"Public Sans",ui-sans-serif,system-ui,sans-serif;
+  --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --board:#121418; --tag:#1c1f25; --ink:#ecebe6; --muted:#a3a39b; --rule:#323640;
+  --tape:#f2c230; --tape-ink:#17181b; --red:#ff7a6e; --red-soft:#3b2220; --green:#7fcf9c; --green-soft:#1d3226; --link:#8cc4ff; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --board:#121418; --tag:#1c1f25; --ink:#ecebe6; --muted:#a3a39b; --rule:#323640;
+  --tape:#f2c230; --tape-ink:#17181b; --red:#ff7a6e; --red-soft:#3b2220; --green:#7fcf9c; --green-soft:#1d3226; --link:#8cc4ff; color-scheme:dark}
+*{box-sizing:border-box}
+body{margin:0;background:var(--board);color:var(--ink);font:15px/1.55 var(--body);padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 56px}
+a{color:var(--link)}
+:focus-visible{outline:3px solid var(--tape);outline-offset:2px}
+.wrap{max-width:1180px;margin:0 auto;display:grid;gap:34px}
+.tape{background:repeating-linear-gradient(-45deg,var(--tape) 0 28px,var(--tape-ink) 28px 34px);height:14px;margin:0 calc(-1 * max(16px,env(safe-area-inset-left,0px)))}
+header{display:grid;gap:14px;padding-top:28px}
+.case{font:600 12px/1 var(--mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted)}
+h1{font:900 clamp(44px,8vw,92px)/.9 var(--display);margin:0;text-transform:uppercase;letter-spacing:.005em;text-wrap:balance}
+h1 em{font-style:normal;background:var(--tape);color:var(--tape-ink);padding:0 .12em}
+h2{font:700 30px/1 var(--display);text-transform:uppercase;margin:0;letter-spacing:.02em}
+h3{font:700 22px/1.05 var(--display);text-transform:uppercase;margin:0;letter-spacing:.02em}
+.premise{max-width:68ch;font-size:17px;margin:0}
+.facts{display:flex;flex-wrap:wrap;gap:8px}
+.fact{font:600 12px/1 var(--mono);padding:8px 10px;border:1.5px solid var(--ink);background:var(--tag)}
+.fact b{font-weight:600;color:var(--red)}
+.note{color:var(--muted);font-size:13.5px;margin:0;max-width:72ch}
+section{display:grid;gap:14px}
+.sechead{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 16px}
+/* play lane */
+.play{background:var(--tag);border:2px solid var(--ink);padding:18px;display:grid;gap:14px}
+.meters{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.m{display:grid;gap:6px}
+.m .lbl{display:flex;justify-content:space-between;font:600 12px var(--mono);letter-spacing:.08em;text-transform:uppercase}
+.bar{height:12px;border:1.5px solid var(--ink);background:var(--board)}
+.bar i{display:block;height:100%;background:var(--red);transition:width .35s}
+.bar.proof i{background:var(--green)}
+.scene{display:grid;gap:8px}
+.scene .t{font:700 28px/1 var(--display);text-transform:uppercase}
+.opts{display:grid;gap:8px}
+.opt{display:flex;gap:12px;align-items:center;text-align:left;font:600 15px/1.3 var(--body);color:var(--ink);background:var(--board);border:1.5px solid var(--ink);padding:10px 12px;cursor:pointer;width:100%}
+.opt:hover{background:var(--tape);color:var(--tape-ink)}
+.opt .k{font:900 22px/1 var(--display);min-width:28px;height:28px;display:grid;place-items:center;background:var(--ink);color:var(--tag)}
+.opt .d{margin-left:auto;font:500 12px var(--mono);color:inherit;opacity:.75;white-space:nowrap}
+.trail{font:500 12px/1.6 var(--mono);color:var(--muted)}
+.row{display:flex;flex-wrap:wrap;gap:10px;align-items:center}
+button.plain{font:600 13px var(--body);border:1.5px solid var(--ink);background:transparent;color:var(--ink);padding:8px 12px;cursor:pointer}
+.ending{border-left:8px solid var(--green);padding:10px 14px;background:var(--green-soft)}
+.ending.caught{border-color:var(--red);background:var(--red-soft)}
+/* evidence tags */
+.acts{display:grid;gap:26px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:14px;align-items:start}
+@media (max-width:420px){.grid{grid-template-columns:1fr}}
+.tag{background:var(--tag);border:1.5px solid var(--rule);padding:16px 16px 14px;display:grid;gap:10px;min-width:0;position:relative;scroll-margin-top:16px}
+.tag:target,.tag.hl{border-color:var(--ink);box-shadow:6px 6px 0 var(--tape)}
+.tag .id{font:600 12px var(--mono);letter-spacing:.1em;color:var(--muted);display:flex;justify-content:space-between;gap:8px}
+.tag .id span:last-child{color:var(--ink)}
+.tag p{margin:0}
+.scenes{margin:0;padding-left:18px;font-size:13.5px;color:var(--muted)}
+.q{font-weight:700}
+.olist{display:grid;gap:6px;margin:0;padding:0;list-style:none}
+.olist li{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:8px;align-items:baseline;font-size:14px}
+.olist .k{font:900 18px/1 var(--display)}
+.olist a{font:600 12px var(--mono);text-decoration:none;white-space:nowrap}
+.olist a.end-got{color:var(--green)} .olist a.end-caught{color:var(--red)}
+.delta{font:500 11.5px var(--mono);color:var(--muted);grid-column:2/4}
+.cameo{font:500 12px var(--mono);color:var(--muted);border-top:1px dashed var(--rule);padding-top:8px}
+.ends{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,340px),1fr));gap:14px}
+.etag{background:var(--tag);border:1.5px solid var(--rule);border-top:8px solid var(--green);padding:16px;display:grid;gap:8px;scroll-margin-top:16px}
+.etag.caught{border-top-color:var(--red)}
+.etag:target{box-shadow:6px 6px 0 var(--tape);border-color:var(--ink)}
+.etag .final{font:700 20px/1.1 var(--display);text-transform:uppercase}
+.etag .count{font:600 12px var(--mono);color:var(--muted)}
+.rules{display:grid;gap:6px;margin:0;padding-left:18px;font-size:14px}
+.graph{overflow-x:auto;background:var(--tag);border:1.5px solid var(--rule);padding:12px}
+@media (prefers-reduced-motion:reduce){.bar i{transition:none}}
+</style>
+
+<div class="tape" aria-hidden="true"></div>
+<div class="wrap">
+  <header>
+    <div class="case" id="caseNo">Case file · Season 1</div>
+    <h1 id="title">Story map</h1>
+    <p class="premise" id="premise"></p>
+    <div class="facts" id="facts"></div>
+  </header>
+
+  <section aria-labelledby="playH">
+    <div class="sechead"><h2 id="playH">Play it</h2><p class="note">Pick options the way the audience would. The meters, flags and endings follow exactly the rules the Showrunner uses.</p></div>
+    <div class="play" id="play"></div>
+  </section>
+
+  <section aria-labelledby="rulesH">
+    <div class="sechead"><h2 id="rulesH">How a part resolves</h2></div>
+    <ul class="rules" id="rules"></ul>
+  </section>
+
+  <section aria-labelledby="scenesH">
+    <div class="sechead"><h2 id="scenesH">Every scene</h2><p class="note">Each tag is one part. Its options show where the vote leads and what it does to the meters. Tap a destination to jump to it.</p></div>
+    <div class="acts" id="acts"></div>
+  </section>
+
+  <section aria-labelledby="endsH">
+    <div class="sechead"><h2 id="endsH">Every ending</h2><p class="note" id="endsNote"></p></div>
+    <div class="ends" id="ends"></div>
+  </section>
+
+  <section aria-labelledby="graphH">
+    <div class="sechead"><h2 id="graphH">The whole map</h2><p class="note">Scroll sideways on a phone.</p></div>
+    <div class="graph"><pre class="mermaid" id="mermaid"></pre></div>
+  </section>
+</div>
+
+<script id="map" type="application/json">/*MAP_JSON*/</script>
+<script>
+const MAP=JSON.parse(document.getElementById("map").textContent);
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const N=Object.fromEntries(MAP.nodes.map(n=>[n.id,n])), E=Object.fromEntries(MAP.endings.map(e=>[e.id,e]));
+const ST=MAP.stakes, P=MAP.pressure?.suspicion_per_part||0, MAXP=MAP.max_parts||99;
+const clamp=v=>Math.max(0,Math.min(100,v));
+const R={cleared:"E_CLEARED",cleared_min_proof:60,cleared_fallback:null,caught_default:"C_FRAMED",caught_if_flag:{},caught_if_node_prefix:{},cleared_fail_caught_at_suspicion:70,...(MAP.rules||{})};
+const caughtFor=(id,flags)=>{for(const [f,e] of Object.entries(R.caught_if_flag))if(flags.has(f))return e;for(const [p,e] of Object.entries(R.caught_if_node_prefix))if(id.startsWith(p))return e;return R.caught_default};
+function step(id,o,s,part){
+  const n={suspicion:clamp(s.suspicion+P+(o.stakes?.suspicion||0)),proof:clamp(s.proof+(o.stakes?.proof||0)),flags:new Set([...s.flags,...(o.flags||[])])};
+  let to=o.to;
+  if(n.suspicion>=ST.suspicion.caught_at)to=caughtFor(id,n.flags);
+  else if(n.proof>=ST.proof.cleared_at&&!E[to])to=R.cleared;
+  if(to===R.cleared&&n.proof<R.cleared_min_proof)to=(n.suspicion>=R.cleared_fail_caught_at_suspicion||!R.cleared_fallback)?caughtFor(id,n.flags):R.cleared_fallback;
+  if(!E[to]&&part+1>=MAXP)to=n.proof>=R.cleared_min_proof?R.cleared:caughtFor(id,n.flags);
+  return {to,s:n};
+}
+// count playthroughs per ending (same walk as scripts/story-map-check.mjs)
+const counts={};let total=0;
+(function walk(id,s,d){if(E[id]){counts[id]=(counts[id]||0)+1;total++;return}if(d>=MAXP+2)return;for(const o of N[id].choice.options){const r=step(id,o,s,d+1);walk(r.to,r.s,d+1)}})(MAP.start,{suspicion:ST.suspicion.start,proof:ST.proof.start,flags:new Set()},0);
+
+const delta=o=>{const x=[];const st=o.stakes||{};if(st.suspicion)x.push(`suspicion ${st.suspicion>0?"+":""}${st.suspicion}`);if(st.proof)x.push(`proof ${st.proof>0?"+":""}${st.proof}`);for(const f of o.flags||[])x.push(`sets ${f}`);return x.join(" · ")};
+const dest=to=>E[to]?`<a href="#${esc(to)}" class="${E[to].type==="caught"?"end-caught":"end-got"}">→ ${E[to].type==="caught"?"CAUGHT":"GOT AWAY"}: ${esc(E[to].title)}</a>`:`<a href="#${esc(to)}">→ ${esc(to)} ${esc(N[to]?.title||"")}</a>`;
+
+// header
+$("title").innerHTML=esc(MAP.title).replace(/only witness/i,m=>`<em>${m}</em>`);
+document.title=(MAP.series||"Story")+" Map";
+$("caseNo").textContent=`Case file · ${MAP.series||""} · Season ${MAP.season||1}`;
+$("premise").textContent=MAP.premise;
+const got=MAP.endings.filter(e=>e.type==="got_away"),cau=MAP.endings.filter(e=>e.type==="caught");
+const sum=arr=>arr.reduce((a,e)=>a+(counts[e.id]||0),0);
+$("facts").innerHTML=[`<b>${MAP.nodes.length}</b> scenes`,`<b>${MAP.endings.length}</b> endings`,`<b>${total.toLocaleString("en-AU")}</b> possible playthroughs`,`got away <b>${Math.round(sum(got)/total*100)}%</b>`,`caught <b>${Math.round(sum(cau)/total*100)}%</b>`,`max <b>${MAXP}</b> parts`].map(x=>`<span class="fact">${x}</span>`).join("");
+const flagEnds=Object.entries(R.caught_if_flag).map(([f,e])=>`"${esc(E[e]?.title)}" if ${esc(MAP.flags?.[f]||f).replace(/\.$/,"").toLowerCase()}`);
+const preEnds=Object.entries(R.caught_if_node_prefix).map(([p,e])=>`"${esc(E[e]?.title)}" if you were at ${esc(p)} scenes (${esc(MAP.nodes.filter(n=>n.id.startsWith(p)).map(n=>n.title).join(", "))})`);
+$("rules").innerHTML=[`Every part adds ${P} suspicion: the longer you stay free, the surer they get.`,
+ `The winning option's meter changes and flags apply (meters stay between 0 and 100).`,
+ `Suspicion reaches ${ST.suspicion.caught_at}: caught. ${[...flagEnds,...preEnds,`otherwise "${esc(E[R.caught_default]?.title)}"`].join("; ")}.`,
+ `Proof reaches ${ST.proof.cleared_at}: "${esc(E[R.cleared]?.title)}".`,
+ `"${esc(E[R.cleared]?.title)}" needs at least ${R.cleared_min_proof} proof. Reach it with less and it becomes a caught ending (suspicion ${R.cleared_fail_caught_at_suspicion}+)${R.cleared_fallback?` or one more part at ${esc(R.cleared_fallback)}`:""}.`,
+ `Part ${MAXP} always ends the season.`,
+ esc(MAP.revisit_rule||"")].map(x=>`<li>${x}</li>`).join("");
+
+// scenes by act
+const acts={};for(const n of MAP.nodes)(acts[n.act]=acts[n.act]||[]).push(n);
+const ACTN={1:"Act 1 · The lane",2:"Act 2 · The night",3:"Act 3 · The hunt",4:"Act 4 · Endgame"};
+$("acts").innerHTML=Object.entries(acts).map(([a,ns])=>`<div class="sec"><h3>${esc(ACTN[a]||"Act "+a)}</h3><div class="grid">${ns.map(n=>`
+  <article class="tag" id="${esc(n.id)}">
+    <div class="id"><span>${esc(n.id)} · ${esc((MAP.locations.find(l=>l.id===n.location)||{}).name||"")}</span><span>${n.id===MAP.start?"PART 1":""}</span></div>
+    <h3>${esc(n.title)}</h3>
+    <p>${esc(n.summary)}</p>
+    <ol class="scenes">${n.scenes.map(x=>`<li>${esc(x)}</li>`).join("")}</ol>
+    <p class="q">${esc(n.choice.text)}</p>
+    <ul class="olist">${n.choice.options.map(o=>`<li><span class="k">${esc(o.key)}</span><span>${esc(o.label)}</span>${dest(o.to)}${delta(o)?`<span class="delta">${esc(delta(o))}</span>`:""}</li>`).join("")}</ul>
+    <div class="cameo">Cameo slot: ${esc(n.cameo)}</div>
+  </article>`).join("")}</div></div>`).join("");
+
+// endings
+$("endsNote").textContent=`${got.length} ways to get away, ${cau.length} ways to get caught. The count is how many of the ${total.toLocaleString("en-AU")} playthroughs end there.`;
+$("ends").innerHTML=[...got,...cau].map(e=>`<article class="etag ${e.type==="caught"?"caught":""}" id="${esc(e.id)}">
+  <div class="case">${e.type==="caught"?"Caught":"Got away"} · ${esc(e.id)}</div>
+  <h3>${esc(e.title)}</h3><p>${esc(e.summary)}</p><p class="final">“${esc(e.final_line)}”</p>
+  <p class="note">Season 2 vote: ${esc(e.season2_choice?.text||"")} ${(e.season2_choice?.options||[]).map(o=>`${esc(o.key)} ${esc(o.label)}`).join(" · ")}</p>
+  <div class="count">${(counts[e.id]||0).toLocaleString("en-AU")} playthroughs</div></article>`).join("");
+
+// mermaid overview
+const lines=["flowchart TD"];
+for(const n of MAP.nodes){lines.push(`  ${n.id}["${n.id} ${n.title.replace(/"/g,"'")}"]`)}
+for(const e of MAP.endings){lines.push(`  ${e.id}(["${e.type==="caught"?"CAUGHT":"GOT AWAY"}: ${e.title.replace(/"/g,"'")}"])`)}
+for(const n of MAP.nodes)for(const o of n.choice.options)lines.push(`  ${n.id} -->|${o.key}| ${o.to}`);
+lines.push("  classDef got fill:#dcebe0,stroke:#2e6b47,color:#17181b","  classDef caught fill:#f5dcd8,stroke:#b3261e,color:#17181b");
+lines.push(`  class ${got.map(e=>e.id).join(",")} got`,`  class ${cau.map(e=>e.id).join(",")} caught`);
+$("mermaid").textContent=lines.join("\n");
+
+// play lane
+let cur,state,part,trail;
+function reset(){cur=MAP.start;state={suspicion:ST.suspicion.start,proof:ST.proof.start,flags:new Set()};part=1;trail=[];draw()}
+function draw(){
+  const el=$("play");const meters=`<div class="meters"><div class="m"><div class="lbl"><span>${esc(ST.suspicion.label)}</span><span>${state.suspicion}%</span></div><div class="bar"><i style="width:${state.suspicion}%"></i></div></div><div class="m"><div class="lbl"><span>${esc(ST.proof.label)}</span><span>${state.proof}%</span></div><div class="bar proof"><i style="width:${state.proof}%"></i></div></div></div>`;
+  const tr=trail.length?`<div class="trail">${trail.map(esc).join("  ›  ")}</div>`:"";
+  if(E[cur]){const e=E[cur];el.innerHTML=meters+`<div class="ending ${e.type==="caught"?"caught":""}"><div class="case">Part ${part} · ${e.type==="caught"?"Caught":"Got away"}</div><div class="scene"><div class="t">${esc(e.title)}</div><p>${esc(e.summary)}</p><p><b>${esc(e.final_line)}</b></p></div></div>${tr}<div class="row"><button type="button" class="plain" id="again">Play again</button></div>`;$("again").onclick=reset;return}
+  const n=N[cur];
+  el.innerHTML=meters+`<div class="scene"><div class="case">Part ${part} · ${esc(n.id)}${state.flags.size?" · flags: "+esc([...state.flags].join(", ")):""}</div><div class="t">${esc(n.title)}</div><p>${esc(n.summary)}</p><p class="q">${esc(n.choice.text)}</p></div>
+  <div class="opts">${n.choice.options.map((o,i)=>`<button type="button" class="opt" data-i="${i}" id="opt-${esc(n.id)}-${esc(o.key)}"><span class="k">${esc(o.key)}</span><span>${esc(o.label)}</span><span class="d">${esc(delta(o))}</span></button>`).join("")}</div>${tr}<div class="row"><button type="button" class="plain" id="restart">Start over</button></div>`;
+  el.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{const o=n.choice.options[+b.dataset.i];const r=step(cur,o,state,part);trail.push(`${n.id} ${o.key}`);state=r.s;cur=r.to;part++;draw()});
+  $("restart").onclick=reset;
+}
+reset();
+</script>

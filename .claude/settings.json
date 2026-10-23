@@ -1,0 +1,16 @@
+{
+  "enableAllProjectMcpServers": true,
+  "permissions": {
+    "allow": [
+      "Bash(node scripts/*)",
+      "Bash(node remotion/render.mjs*)",
+      "Bash(cd remotion && npm *)",
+      "Bash(bash scripts/*)",
+      "Bash(ffmpeg *)",
+      "Bash(ffprobe *)",
+      "mcp__higgsfield__list_voices",
+      "mcp__higgsfield__balance",
+      "mcp__higgsfield__show_generations"
+    ]
+  }
+}
