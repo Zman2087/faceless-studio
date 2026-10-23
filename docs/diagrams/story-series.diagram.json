@@ -1,0 +1,269 @@
+{
+  "title": "Interactive story series: the daily loop",
+  "groups": [
+    {
+      "x": 40,
+      "y": 80,
+      "w": 1540,
+      "h": 640,
+      "label": "Every day (times are the default schedule)"
+    },
+    {
+      "x": 40,
+      "y": 780,
+      "w": 1540,
+      "h": 220,
+      "label": ""
+    },
+    {
+      "x": 1620,
+      "y": 80,
+      "w": 400,
+      "h": 920,
+      "label": "Every week"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "audience",
+      "x": 80,
+      "y": 160,
+      "w": 320,
+      "h": 160,
+      "color": "orange",
+      "text": "Audience\ncomments A, B or C, votes\nin polls, names people,\nshares theories"
+    },
+    {
+      "id": "verdict",
+      "x": 460,
+      "y": 160,
+      "w": 320,
+      "h": 160,
+      "color": "yellow",
+      "text": "You, about 30 s\ntype the verdict in the\ntracker: counts per app,\nnames, what people say"
+    },
+    {
+      "id": "showrunner",
+      "x": 840,
+      "y": 160,
+      "w": 320,
+      "h": 160,
+      "color": "purple",
+      "text": "Showrunner 4:47\ncloses the vote, follows\nthe map, applies names,\nplaces cameos,\nplans the next part"
+    },
+    {
+      "id": "writer",
+      "x": 1220,
+      "y": 160,
+      "w": 320,
+      "h": 160,
+      "color": "blue",
+      "text": "Writer 5:47\nconsequence first, 90-150 s,\nnarrator + character lines"
+    },
+    {
+      "id": "map",
+      "x": 840,
+      "y": 370,
+      "w": 320,
+      "h": 110,
+      "color": "grey",
+      "dashed": true,
+      "text": "Hidden story map\nnever shown to viewers"
+    },
+    {
+      "id": "checker",
+      "x": 1220,
+      "y": 530,
+      "w": 320,
+      "h": 160,
+      "color": "blue",
+      "text": "Checker 7:41\nscores it; waits for your OK\nif approval_mode is owner"
+    },
+    {
+      "id": "producer",
+      "x": 840,
+      "y": 530,
+      "w": 320,
+      "h": 160,
+      "color": "orange",
+      "text": "Producer 9:43\nvoices, scenes, Remotion:\ntitle card, speech bubbles,\nvote card"
+    },
+    {
+      "id": "qa",
+      "x": 460,
+      "y": 530,
+      "w": 320,
+      "h": 160,
+      "color": "blue",
+      "text": "QA 15:47\ncaptions with the choice,\nstory poll, cover"
+    },
+    {
+      "id": "post",
+      "x": 80,
+      "y": 530,
+      "w": 320,
+      "h": 160,
+      "color": "yellow",
+      "text": "You, about 7 pm\npost the part,\nturn on the AI label"
+    },
+    {
+      "id": "ending",
+      "x": 80,
+      "y": 850,
+      "w": 320,
+      "h": 120,
+      "color": "red",
+      "text": "Ending part\nthe map lands on an ending;\nseason-two vote"
+    },
+    {
+      "id": "reveal",
+      "x": 460,
+      "y": 850,
+      "w": 320,
+      "h": 120,
+      "color": "purple",
+      "text": "Route Reveal\nyour route vs the perfect run,\nthe turning point"
+    },
+    {
+      "id": "book",
+      "x": 840,
+      "y": 850,
+      "w": 320,
+      "h": 120,
+      "color": "green",
+      "text": "Gamebook + browser game\nbuilt from the season's map,\nsold after the season"
+    },
+    {
+      "id": "next",
+      "x": 1220,
+      "y": 850,
+      "w": 320,
+      "h": 120,
+      "color": "teal",
+      "text": "Next season\nPart 1 of the new map"
+    },
+    {
+      "id": "developer",
+      "x": 1660,
+      "y": 160,
+      "w": 320,
+      "h": 160,
+      "color": "purple",
+      "text": "Series Developer\nresearch, side content\n(recaps, polls, profiles)"
+    },
+    {
+      "id": "pitches",
+      "x": 1660,
+      "y": 420,
+      "w": 320,
+      "h": 130,
+      "color": "yellow",
+      "text": "3 pitches a month\nyou approve one\nin the tracker"
+    },
+    {
+      "id": "newmap",
+      "x": 1660,
+      "y": 640,
+      "w": 320,
+      "h": 130,
+      "color": "blue",
+      "text": "Developer writes the\nfull map and checks it\n(story-map-check.mjs)"
+    }
+  ],
+  "arrows": [
+    {
+      "from": "audience",
+      "to": "verdict"
+    },
+    {
+      "from": "verdict",
+      "to": "showrunner"
+    },
+    {
+      "from": "showrunner",
+      "to": "writer"
+    },
+    {
+      "from": "map",
+      "to": "showrunner",
+      "dashed": true
+    },
+    {
+      "from": "writer",
+      "to": "checker"
+    },
+    {
+      "from": "checker",
+      "to": "producer"
+    },
+    {
+      "from": "producer",
+      "to": "qa"
+    },
+    {
+      "from": "qa",
+      "to": "post"
+    },
+    {
+      "from": "post",
+      "to": "audience"
+    },
+    {
+      "from": "post",
+      "to": "ending",
+      "dashed": true
+    },
+    {
+      "from": "ending",
+      "to": "reveal"
+    },
+    {
+      "from": "reveal",
+      "to": "book"
+    },
+    {
+      "from": "book",
+      "to": "next"
+    },
+    {
+      "from": "developer",
+      "to": "pitches"
+    },
+    {
+      "from": "pitches",
+      "to": "newmap"
+    },
+    {
+      "from": "newmap",
+      "to": "next",
+      "dashed": true
+    }
+  ],
+  "notes": [
+    {
+      "x": 255,
+      "y": 735,
+      "text": "when the map reaches an ending",
+      "size": 16
+    },
+    {
+      "x": 255,
+      "y": 410,
+      "text": "next part opens on\nwhat the vote caused",
+      "size": 16
+    },
+    {
+      "x": 1395,
+      "y": 410,
+      "text": "one part in the\npipeline at a time",
+      "size": 16
+    },
+    {
+      "x": 290,
+      "y": 795,
+      "text": "At the end of the season",
+      "size": 22,
+      "color": "#495057"
+    }
+  ]
+}

@@ -6,16 +6,7 @@ want one, a fictional AI character). You set a channel up once; six scheduled ag
 write, fact-check, produce and caption a video every day, and you post it from a studio page in
 about two minutes.
 
-```
- you (once)            Claude agents (every day)                              you (2 min/day)
- ───────────           ─────────────────────────────────────────────────      ──────────────
- /new-channel  ──►  Planner ─► Writer ─► Checker ─► Producer ─► QA      ──► Studio page:
- niche, voice          weekly     scripts   scores     voice +      captions    download, paste
- look, tracker         trends     beats     >7 passes  scenes/clips virality    captions, post
-                       analysis   specs     facts      + Remotion   cover       enter views
-                                                       overlays                  ▲
-                       Strategist (monthly): what's working, when to sell ───────┘
-```
+![You set it up once, the agents work every day, you post in two minutes](docs/diagrams/overview-loop.svg)
 
 ## What you need
 
@@ -58,10 +49,26 @@ Connect Higgsfield when Claude asks:
 The first finished video lands after the next producer run (or say **"make the first video now"**).
 
 ## Interactive story series
-Pick "interactive story" as the format and you get a choose-what-happens series instead of a host:
-every part ends on an A/B/C choice viewers vote on in the comments, a **Showrunner** agent follows a
-pre-written branching map (every path ends with the hero getting away or getting caught), and paid
-**cameo passes** put buyers' handles inside scenes. See [docs/STORY-SERIES.md](docs/STORY-SERIES.md).
+Pick "interactive story" as the format and you get a choose-what-happens series instead of a host.
+Each part (90-150 s, an engaging narrator plus short in-character lines in speech bubbles) opens on
+what the audience's last vote caused and ends on an A/B/C choice. Viewers vote in the comments and in
+story polls, and they name characters ("comment the victim's name"). You type the verdict into the
+studio page; a **Showrunner** agent follows a hidden, pre-written branching map, so viewers only ever
+see the story, the choice and last part's vote share, never meters, the map or the endings. A weekly
+**Series Developer** researches, plans side content and pitches the next season.
+
+- **Two looks:** *stick* (stick-figure scenes drawn in code by Remotion, zero credits) or
+  *illustrated* (AI graphic-novel stills with one fixed hero reference so the main character looks
+  the same all season, animated with camera moves; all text and the vote card stay in Remotion).
+- **Cameo passes:** paid passes put buyers' handles inside a scene, sold through Stripe Payment Links.
+- **Optional website:** live vote, the Files, a case board, The Rules, a browser game for finished
+  seasons and a shop ([docs/WEBSITE.md](docs/WEBSITE.md)).
+- **Season end:** a Route Reveal episode (the audience's route vs the perfect run), then a
+  pick-your-own-path gamebook built from the map ([docs/GAMEBOOK.md](docs/GAMEBOOK.md)).
+
+![The story series loop](docs/diagrams/story-series.svg)
+
+Everything else: [docs/STORY-SERIES.md](docs/STORY-SERIES.md).
 
 ## Your daily routine
 Open the studio page → **Ready to post** → download the video and cover → copy each app's caption →
@@ -72,19 +79,20 @@ counts in; the planner uses them to choose what comes next. See [docs/DAILY.md](
 
 ![How the kit fits together](docs/diagrams/architecture.svg)
 
-More: [architecture](docs/ARCHITECTURE.md) · [a post's life](docs/diagrams/post-statuses.svg) · [how one video is made](docs/diagrams/video-production.svg)
+More: [architecture](docs/ARCHITECTURE.md) · [a post's life](docs/diagrams/post-statuses.svg) · [how one video is made](docs/diagrams/video-production.svg) · [the story loop](docs/diagrams/story-series.svg) · [website and payments](docs/diagrams/website-payments.svg)
 
 ## Inside the repo
 
 | path | |
 |---|---|
 | `.claude/skills/` | `new-channel`, `make-post`, `charsheet-soul`, `ugc-character-video`, `content-engine`, `digital-product`, `video-script`, `animated-video`, `video-edit`, `asset-library` (+ Remotion skills after setup) |
-| `agents/` | the six agent prompt templates and their schedule |
+| `agents/` | the six agent prompt templates (plus the Showrunner and Series Developer for story series) and their schedule |
 | `tracker/tracker.html` | the studio page |
 | `channels/_template/` | what a character is made of (`settings.json`, `character.md`) |
 | `remotion/` | the video engine: JSON spec → MP4 ([SPEC.md](remotion/SPEC.md)) |
-| `scripts/` | scaffolding, agent rendering, `assets.mjs` asset library, `doctor.mjs` health check |
-| `docs/` | [interactive story series](docs/STORY-SERIES.md), [architecture](docs/ARCHITECTURE.md), [scheduling](docs/SCHEDULING.md), [daily routine](docs/DAILY.md), [costs & safety](docs/COSTS-AND-SAFETY.md) |
+| `scripts/` | scaffolding, agent rendering, `assets.mjs` asset library, `doctor.mjs` health check; story tools `story-map-check.mjs`, `story-route-compare.mjs`, `build-story-map.mjs`; website `build-site.mjs`, `site-state.mjs` |
+| `site/template/` | the optional series website |
+| `docs/` | [interactive story series](docs/STORY-SERIES.md), [series website](docs/WEBSITE.md), [gamebook](docs/GAMEBOOK.md), [architecture](docs/ARCHITECTURE.md), [scheduling](docs/SCHEDULING.md), [daily routine](docs/DAILY.md), [costs & safety](docs/COSTS-AND-SAFETY.md); diagrams in `docs/diagrams/` (Excalidraw) |
 
 Health check any time: `node scripts/doctor.mjs`.
 

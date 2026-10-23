@@ -9,6 +9,15 @@ Rough guide: a voice take is a few credits; a talking clip ~40-80 depending on m
 Remotion overlays, captions, covers and the trend scan cost nothing. Onboarding (face anchor,
 character sheet, location, voice samples) is a one-off ~100-200.
 
+Story series in the stick look cost only the voice takes (the scenes are drawn in code); the illustrated
+look adds a few credits per still. The website and the Route Reveal cost nothing.
+
+## Payments (story series)
+Cameo passes are sold through Stripe Payment Links you create. Claude reads completed checkouts through
+the Stripe connector, read-only; it never asks for or stores a secret key, and never charges, refunds
+or changes anything. A cameo is never a suspect, victim or anyone accused; refund anyone you can't place
+within 30 days.
+
 ## Platform rules
 - Turn on each app's AI-generated content label on every post (TikTok, Instagram and YouTube all require disclosure of realistic AI content). The renders also carry a small "AI-generated" tag.
 - Don't post the same video from several accounts you own, and don't buy engagement.

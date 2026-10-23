@@ -1,0 +1,193 @@
+{
+  "title": "Series website: cameo passes and the live state",
+  "groups": [
+    {
+      "x": 40,
+      "y": 80,
+      "w": 1520,
+      "h": 250,
+      "label": "A viewer buys a cameo pass"
+    },
+    {
+      "x": 40,
+      "y": 400,
+      "w": 1520,
+      "h": 500,
+      "label": ""
+    }
+  ],
+  "nodes": [
+    {
+      "id": "viewer",
+      "x": 80,
+      "y": 160,
+      "w": 320,
+      "h": 130,
+      "color": "orange",
+      "text": "Viewer\nwatches a part, wants\ntheir @ in the story"
+    },
+    {
+      "id": "website",
+      "x": 460,
+      "y": 160,
+      "w": 320,
+      "h": 130,
+      "color": "green",
+      "text": "Series website\nlive vote, the Files, case\nboard, The Rules, game, shop"
+    },
+    {
+      "id": "link",
+      "x": 840,
+      "y": 160,
+      "w": 320,
+      "h": 130,
+      "color": "purple",
+      "text": "Stripe Payment Link\nrequired custom field\n\"handle\""
+    },
+    {
+      "id": "thanks",
+      "x": 1220,
+      "y": 160,
+      "w": 320,
+      "h": 130,
+      "color": "green",
+      "text": "Thanks page\n\"you'll appear in an\nupcoming part\""
+    },
+    {
+      "id": "host",
+      "x": 80,
+      "y": 480,
+      "w": 320,
+      "h": 130,
+      "color": "grey",
+      "text": "Host\n(Cloudflare Pages, Netlify,\nGitHub Pages)"
+    },
+    {
+      "id": "siterepo",
+      "x": 460,
+      "y": 480,
+      "w": 320,
+      "h": 130,
+      "color": "grey",
+      "text": "Site repo\nstate.json committed\nto the default branch"
+    },
+    {
+      "id": "state",
+      "x": 840,
+      "y": 480,
+      "w": 320,
+      "h": 130,
+      "color": "yellow",
+      "text": "state.json\nsite-state.mjs: vote, past\nparts, case board, next drop"
+    },
+    {
+      "id": "showrunner",
+      "x": 1220,
+      "y": 480,
+      "w": 320,
+      "h": 130,
+      "color": "purple",
+      "text": "Showrunner (daily)\nimports new sales\nas cameos"
+    },
+    {
+      "id": "cameos",
+      "x": 1220,
+      "y": 730,
+      "w": 320,
+      "h": 130,
+      "color": "blue",
+      "text": "Cameos in the tracker\nqueued, oldest first"
+    },
+    {
+      "id": "nextpart",
+      "x": 840,
+      "y": 730,
+      "w": 320,
+      "h": 130,
+      "color": "blue",
+      "text": "Next part\nthe handle appears in a scene:\na witness list, a roster"
+    }
+  ],
+  "arrows": [
+    {
+      "from": "viewer",
+      "to": "website"
+    },
+    {
+      "from": "website",
+      "to": "link"
+    },
+    {
+      "from": "link",
+      "to": "thanks"
+    },
+    {
+      "from": "link",
+      "to": "showrunner",
+      "dashed": true
+    },
+    {
+      "from": "showrunner",
+      "to": "state"
+    },
+    {
+      "from": "state",
+      "to": "siterepo"
+    },
+    {
+      "from": "siterepo",
+      "to": "host"
+    },
+    {
+      "from": "host",
+      "to": "website"
+    },
+    {
+      "from": "showrunner",
+      "to": "cameos"
+    },
+    {
+      "from": "cameos",
+      "to": "nextpart"
+    }
+  ],
+  "notes": [
+    {
+      "x": 1240,
+      "y": 350,
+      "text": "completed checkouts (read-only)",
+      "size": 16
+    },
+    {
+      "x": 140,
+      "y": 350,
+      "text": "redeploys on push",
+      "size": 16
+    },
+    {
+      "x": 80,
+      "y": 680,
+      "text": "No site repo attached? The Showrunner puts\nstate.json in its log for you to commit.",
+      "size": 16
+    },
+    {
+      "x": 40,
+      "y": 930,
+      "text": "You connect Stripe yourself; Claude never sees or stores a secret key and never charges, refunds or edits anything in Stripe.",
+      "size": 18
+    },
+    {
+      "x": 40,
+      "y": 960,
+      "text": "state.json holds only what viewers may see: the open vote and live shares, past parts, the case board, the next drop. Never meters, the map or endings.",
+      "size": 18
+    },
+    {
+      "x": 460,
+      "y": 415,
+      "text": "Every morning, the Showrunner refreshes the site and imports sales",
+      "size": 22,
+      "color": "#495057"
+    }
+  ]
+}

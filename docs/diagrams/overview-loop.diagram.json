@@ -1,0 +1,170 @@
+{
+  "title": "How a channel runs: you once, the agents daily, you 2 minutes a day",
+  "groups": [
+    {
+      "x": 40,
+      "y": 80,
+      "w": 340,
+      "h": 480,
+      "label": "You, once"
+    },
+    {
+      "x": 420,
+      "y": 80,
+      "w": 1670,
+      "h": 480,
+      "label": "Claude agents, every day (scheduled tasks)"
+    },
+    {
+      "x": 2130,
+      "y": 80,
+      "w": 360,
+      "h": 480,
+      "label": "You, about 2 min a day"
+    }
+  ],
+  "nodes": [
+    {
+      "id": "setup",
+      "x": 80,
+      "y": 160,
+      "w": 260,
+      "h": 150,
+      "color": "yellow",
+      "text": "/new-channel\nniche, narrator, voice,\nlook, tracker, agents"
+    },
+    {
+      "id": "planner",
+      "x": 460,
+      "y": 160,
+      "w": 270,
+      "h": 150,
+      "color": "blue",
+      "text": "Planner (weekly)\ntrends, what worked,\nnext week's ideas"
+    },
+    {
+      "id": "writer",
+      "x": 790,
+      "y": 160,
+      "w": 270,
+      "h": 150,
+      "color": "blue",
+      "text": "Writer\nscript, beats,\nRemotion spec"
+    },
+    {
+      "id": "checker",
+      "x": 1120,
+      "y": 160,
+      "w": 270,
+      "h": 150,
+      "color": "blue",
+      "text": "Checker\nscores it, checks facts;\n7+ passes"
+    },
+    {
+      "id": "producer",
+      "x": 1450,
+      "y": 160,
+      "w": 270,
+      "h": 150,
+      "color": "orange",
+      "text": "Producer\nvoice + scenes or clips,\nRemotion render\n(the only credit spender)"
+    },
+    {
+      "id": "qa",
+      "x": 1780,
+      "y": 160,
+      "w": 270,
+      "h": 150,
+      "color": "blue",
+      "text": "QA\ncaptions, cover,\nvirality check"
+    },
+    {
+      "id": "studio",
+      "x": 2170,
+      "y": 160,
+      "w": 280,
+      "h": 150,
+      "color": "green",
+      "text": "Studio page\ndownload, paste captions,\npost, mark as posted"
+    },
+    {
+      "id": "views",
+      "x": 2170,
+      "y": 400,
+      "w": 280,
+      "h": 110,
+      "color": "green",
+      "text": "Weekly: type in\nthe view counts"
+    },
+    {
+      "id": "strategist",
+      "x": 460,
+      "y": 400,
+      "w": 600,
+      "h": 110,
+      "color": "purple",
+      "text": "Strategist (monthly)\nwhat's working, when to sell a product"
+    }
+  ],
+  "arrows": [
+    {
+      "from": "setup",
+      "to": "planner"
+    },
+    {
+      "from": "planner",
+      "to": "writer"
+    },
+    {
+      "from": "writer",
+      "to": "checker"
+    },
+    {
+      "from": "checker",
+      "to": "producer"
+    },
+    {
+      "from": "producer",
+      "to": "qa"
+    },
+    {
+      "from": "qa",
+      "to": "studio"
+    },
+    {
+      "from": "studio",
+      "to": "views",
+      "dashed": true
+    },
+    {
+      "from": "views",
+      "to": "strategist",
+      "dashed": true
+    },
+    {
+      "from": "strategist",
+      "to": "planner",
+      "dashed": true
+    }
+  ],
+  "notes": [
+    {
+      "x": 40,
+      "y": 590,
+      "text": "Story series: a daily Showrunner takes the Planner's place (it closes each vote and plans the next part), and a weekly Series Developer is added.",
+      "size": 18
+    },
+    {
+      "x": 40,
+      "y": 620,
+      "text": "Every agent checks the tracker's Pause button first. Only the Producer spends Higgsfield credits, inside settings.budget.",
+      "size": 18
+    },
+    {
+      "x": 1300,
+      "y": 420,
+      "text": "views feed the next plan",
+      "size": 16
+    }
+  ]
+}

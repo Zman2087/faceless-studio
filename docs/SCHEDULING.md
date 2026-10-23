@@ -15,6 +15,8 @@ do it from the Claude app or Claude Code on the web with this repo attached:
 | 4 Producer | daily 9:43 am | **yes** (gated by `settings.budget`) |
 | 5 QA + captions | daily 3:47 pm | no (virality predictor may use a few) |
 | 6 Strategist | 1st of the month 10:13 am | no |
+| 0 Showrunner (story series only, replaces the Planner) | daily 4:47 am | no (reads Stripe sales read-only) |
+| 7 Series Developer (story series only) | Wednesdays 11:19 am | no |
 
 Change times in `agents/schedule.json` before rendering, or ask Claude to update a task.
 

@@ -10,6 +10,12 @@
 5. Tap **Mark as posted**.
 6. If the post was a viewer request, reply to their comment with the video (the reply text is in the post).
 
+**Story series:** before the Showrunner runs (4:47 am by default), open the last part's **The audience's
+verdict**: type the A/B/C counts from each app's comments and polls, the names people suggested (if the
+part asked for one) and a line on what people are saying, then **Save the verdict**. About 30 seconds.
+Approve or pass on the Series Developer's pitches under **Next series ideas** when they appear.
+See [STORY-SERIES.md](STORY-SERIES.md).
+
 **Weekly:** open each posted video and type in its views (TikTok, Reels, Shorts) → **Save views**. The
 planner reads them on Sunday to decide what to make more of.
 

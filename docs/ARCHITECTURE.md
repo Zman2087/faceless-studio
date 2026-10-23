@@ -15,6 +15,11 @@
 - `posts/p-NNN` — one document per video, moving through the statuses below
 - `requests/rq-*` — topics viewers asked for in comments
 - `runs/<agent>` — the last 20 log lines per agent
+- story series also: `story/map` (the hidden branching map), `story/maps/<id>` (next-season maps), `cameos/c-*`, `pitches/pi-*`, `seasons/s<n>`; see [STORY-SERIES.md](STORY-SERIES.md)
+
+![The story series loop](diagrams/story-series.svg)
+
+![Website and payments](diagrams/website-payments.svg)
 
 Statuses: `planned → scripted → needs_rewrite ↺ → awaiting_owner? → approved → producing → produced → ready → posted` (+ `failed`, `shelved`).
 
@@ -40,4 +45,5 @@ word-timed captions, stamps, charts and the CTA on top — deterministic, editab
 Faceless channels (`format: "faceless"`, the default) are made entirely in Remotion: story and explainer scenes, library b-roll and a voice-over. Only on-camera channels (`format: "character"`) use Higgsfield character clips.
 
 ## Editing the diagrams
+Diagrams are always Excalidraw, never ASCII art. Quick ones start as a sketch (`docs/diagrams/<name>.diagram.json`): `cd docs/diagrams/tools && node render.mjs ../<name>.diagram.json` writes the `.excalidraw` and `.svg`.
 The diagrams are Excalidraw files in `docs/diagrams/`. Open a `.excalidraw` file at [excalidraw.com](https://excalidraw.com) (File → Open), edit it, then save it back and export the SVG next to it (Export image → SVG) so the docs update.
