@@ -47,7 +47,7 @@ producing → produced → ready → posted. Story series add a vote on each pos
 agents from the tracker.
 
 ## Rules
-- Characters are fictional. No real person's likeness, no real credentials, no financial/medical/legal advice, no brand logos, no fake reviews. AI-generated labels on, always.
+- Characters are fictional. No real person's likeness, no real credentials, no financial/medical/legal advice, no brand logos, no fake reviews. Use each platform's AI label whenever its rules require it (realistic-looking people, scenes or voices); never burn "AI-generated" text into the video or thumbnail.
 - Announce credit costs before generating; respect `settings.budget`.
 - Never commit API keys, emails or personal data. Job ids and voice ids are fine.
 - Rendering: Remotion needs Chrome. Locally it downloads its own; in cloud sandboxes `render.mjs` finds the pre-installed Playwright Chromium (or set `REMOTION_BROWSER`). Always look at the `--preview` strip before delivering a video.

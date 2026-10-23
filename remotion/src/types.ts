@@ -112,5 +112,5 @@ export type Spec = {
   shots: Shot[];
   overlays?: Overlay[];
   watermark?: string; // e.g. @handle
-  ai_label?: boolean; // small "AI-generated" tag (on by default)
+  ai_label?: boolean; // small "AI-generated" tag (off by default; platforms label via their own toggle)
 };

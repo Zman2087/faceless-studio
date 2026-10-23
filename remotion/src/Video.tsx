@@ -214,7 +214,7 @@ export const Video: React.FC<Spec> = (spec) => {
       {cap.enabled && spec.words && spec.words.length > 0 && <Captions words={spec.words} t={t} per={cap.words_per_chunk!} y={cap.y!} upper={cap.case === "upper"}
         hide={(spec.overlays || []).filter((o) => o.type === "choice").map((o) => [o.at, o.end ?? spec.duration] as [number, number])} />}
       {spec.watermark && <div style={{ position: "absolute", right: 40, top: 60, fontFamily: t.font, fontWeight: 700, fontSize: 30, color: "rgba(255,255,255,.7)" }}>{spec.watermark}</div>}
-      {spec.ai_label !== false && <div style={{ position: "absolute", left: 40, top: 60, fontFamily: "monospace", fontSize: 22, color: "rgba(255,255,255,.55)" }}>AI-generated</div>}
+      {spec.ai_label === true && <div style={{ position: "absolute", left: 40, top: 60, fontFamily: "monospace", fontSize: 22, color: "rgba(255,255,255,.55)" }}>AI-generated</div>}
       {spec.audio && <Audio src={resolve(spec.audio)} volume={spec.audio_volume ?? 1} />}
       {spec.music && <Audio src={resolve(spec.music)} volume={spec.music_volume ?? 0.12} loop />}
       {(spec.sounds || []).map((x, i) => <Sequence key={"snd" + i} from={Math.round(x.at * fps)} name={`sound ${i + 1}`}><Audio src={resolve(x.src)} volume={x.volume ?? 1} /></Sequence>)}
