@@ -9,10 +9,10 @@ export type Outfit = { hood?: boolean; cap?: boolean; coat?: boolean; tie?: bool
 };
 export type Item = "phone" | "knife" | "bag" | "envelope" | "badge" | "torch" | "mug" | "suitcase" | "none";
 
-type Limbs = { lean: number; hipDrop: number; lThigh: number; lShin: number; rThigh: number; rShin: number; lUpper: number; lFore: number; rUpper: number; rFore: number; headTilt: number };
-const L = { torso: 150, thigh: 98, shin: 98, upper: 78, fore: 74, head: 38, neck: 14 };
+export type Limbs = { lean: number; hipDrop: number; lThigh: number; lShin: number; rThigh: number; rShin: number; lUpper: number; lFore: number; rUpper: number; rFore: number; headTilt: number };
+export const L = { torso: 150, thigh: 98, shin: 98, upper: 78, fore: 74, head: 38, neck: 14 };
 
-const POSES: Record<string, Limbs> = {
+export const POSES: Record<string, Limbs> = {
   stand: { lean: 0, hipDrop: 0, lThigh: 6, lShin: 0, rThigh: -6, rShin: 0, lUpper: 12, lFore: 8, rUpper: -12, rFore: -8, headTilt: 0 },
   crouch: { lean: 22, hipDrop: 80, lThigh: 70, lShin: -55, rThigh: 40, rShin: -75, lUpper: 50, lFore: 70, rUpper: 30, rFore: 60, headTilt: 10 },
   kneel: { lean: 8, hipDrop: 95, lThigh: 85, lShin: -5, rThigh: 0, rShin: -90, lUpper: 35, lFore: 60, rUpper: 25, rFore: 55, headTilt: 15 },
@@ -36,7 +36,7 @@ const POSES: Record<string, Limbs> = {
 };
 
 // Walk and run are cycles over phase p (radians).
-function gait(kind: "walk" | "run", p: number): Limbs {
+export function gait(kind: "walk" | "run", p: number): Limbs {
   const run = kind === "run";
   const A = run ? 46 : 24, K = run ? 70 : 32, S = run ? 60 : 26;
   const s = Math.sin(p), c = Math.sin(p + Math.PI);
@@ -48,8 +48,8 @@ function gait(kind: "walk" | "run", p: number): Limbs {
   };
 }
 
-const rad = (d: number) => (d * Math.PI) / 180;
-const at = (x: number, y: number, ang: number, len: number) => [x + Math.sin(rad(ang)) * len, y + Math.cos(rad(ang)) * len] as const;
+export const rad = (d: number) => (d * Math.PI) / 180;
+export const at = (x: number, y: number, ang: number, len: number) => [x + Math.sin(rad(ang)) * len, y + Math.cos(rad(ang)) * len] as const;
 
 export type FigureProps = {
   x: number; ground: number; scale?: number; facing?: "left" | "right"; pose?: Pose; phase?: number;

@@ -4,15 +4,17 @@ import React from "react";
 import { AbsoluteFill, interpolate, random, useCurrentFrame, useVideoConfig, Easing, staticFile } from "remotion";
 import { Theme } from "../types";
 import { StickFigure, Pose, Outfit, Item, Expression } from "./rig";
+import { Toon, ToonLook, Talk } from "./toon";
 import { SetView, SetName, palette, W, H, GROUND, Pal } from "./sets";
 
-export type CastMember = { color: string; outfit?: Outfit; name?: string };
+export type CastMember = { color: string; outfit?: Outfit; name?: string; toon?: ToonLook };
 export type Actor = {
   cast?: string; color?: string; outfit?: Outfit; label?: string;
   x: number; y?: number; scale?: number; facing?: "left" | "right";
   pose?: Pose; then?: { at: number; pose: Pose; expression?: Expression; item?: Item; item2?: Item; facing?: "left" | "right" }[];
   move?: { to: number; at?: number; dur?: number; gait?: "walk" | "run" };
   item?: Item; item2?: Item; expression?: Expression; enter_at?: number; exit_at?: number; glow?: boolean;
+  style?: "stick" | "toon"; look?: ToonLook; talk?: Talk; gaze?: number; // toon: cartoon character with a face, blinking and lip-sync (talk.env = mouth openness per frame)
 };
 export type Prop = { skew?: number; figure?: "bun" | "short" | "none"; gesture?: "hand_mouth" | "point" | "still"; w?: number; h?: number; type: "window" | "ute" | "car" | "police" | "bin" | "door" | "sign" | "screen" | "phone" | "tape" | "chair" | "knife" | "bag" | "drain" | "boat" | "truck"; x: number; y?: number; scale?: number; text?: string; at?: number; flip?: boolean };
 export type Fx = "siren_rise" | "streaks" | "rain" | "sirens" | "flicker" | "heartbeat" | "fog" | "flash" | "letterbox" | "spotlight" | "dark" | "shake";
@@ -84,9 +86,11 @@ export const Scene: React.FC<{ s: SceneShot; t: Theme; cast?: Record<string, Cas
             return (
               <g key={i}>
               {streaks && <g stroke={p.ink} strokeWidth={5 * sc} strokeLinecap="round" opacity={0.45}>{[0.25, 0.45, 0.62, 0.8].map((h, k) => { const dir = st.facing === "left" ? 1 : -1; const len = (120 + 60 * random(`st${k}${Math.floor(f / 2)}`)) * sc; const y0 = gy - h * 420 * sc; const x0 = st.x + dir * 50 * sc; return <line key={k} x1={x0} y1={y0} x2={x0 + dir * len} y2={y0} />; })}</g>}
+              {(a.style === "toon" || (a.style !== "stick" && c.toon)) ? <Toon x={st.x} ground={a.y ?? GROUND + 40} scale={a.scale ?? 1} facing={st.facing} pose={st.pose} phase={st.phase} blend={st.blend}
+                look={{ ...(c.toon || {}), ...(a.look || {}) }} expression={st.expr} item={st.item} item2={st.item2} talk={a.talk} sec={sec} seed={a.cast || String(i)} gaze={a.gaze} opacity={op} /> :
               <StickFigure x={st.x} ground={a.y ?? GROUND + 40} scale={a.scale ?? 1} facing={st.facing} pose={st.pose} phase={st.phase} blend={st.blend}
                 color={a.color || c.color || t.accent} ink={p.ink} outfit={{ ...(c.outfit || {}), ...(a.outfit || {}) }} item={st.item} expression={st.expr}
-                glow={a.glow ? p.light : undefined} label={a.label} opacity={op} item2={st.item2} />
+                glow={a.glow ? p.light : undefined} label={a.label} opacity={op} item2={st.item2} />}
               </g>
             );
           })}
