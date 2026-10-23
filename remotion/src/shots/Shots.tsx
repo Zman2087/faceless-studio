@@ -90,13 +90,27 @@ const camera = (move: Move, k: number, fx: number, fy: number) => {
   }
 };
 
-const Media: React.FC<{ src: string; start?: number; fit?: "cover" | "contain"; kenburns?: boolean; muted?: boolean; dim?: number; move?: Move; focus?: { x: number; y: number }; flicker?: boolean; rain?: boolean }> = ({
-  src, start = 0, fit = "cover", kenburns = true, muted = true, dim = 0, move, focus, flicker, rain,
+type MediaFx = "shake" | "flash" | "siren_rise" | "streaks" | "vignette" | "grade";
+const Media: React.FC<{ src: string; start?: number; fit?: "cover" | "contain"; kenburns?: boolean; muted?: boolean; dim?: number; move?: Move; focus?: { x: number; y: number }; flicker?: boolean; rain?: boolean;
+  zoom?: [number, number]; fx?: MediaFx[]; fx_at?: Record<string, number>; siren_level?: number }> = ({
+  src, start = 0, fit = "cover", kenburns = true, muted = true, dim = 0, move, focus, flicker, rain, zoom, fx = [], fx_at = {}, siren_level = 1,
 }) => {
   const f = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
   const k = Math.min(1, f / Math.max(1, durationInFrames));
-  const cam = move ? camera(move, k, focus?.x ?? 0.5, focus?.y ?? 0.5) : { z: kenburns ? interpolate(f, [0, durationInFrames], [1.04, 1.14]) : 1, x: 0, y: 0 };
+  let cam = move ? camera(move, k, focus?.x ?? 0.5, focus?.y ?? 0.5) : { z: kenburns ? interpolate(f, [0, durationInFrames], [1.04, 1.14]) : 1, x: 0, y: 0 };
+  // zoom: [from, to] scale toward the focus point (a punch-in or slow push on one part of the still)
+  const ez = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2;
+  if (zoom) {
+    // bring the focus point toward the centre as far as the zoom allows without showing an edge
+    const z = zoom[0] + (zoom[1] - zoom[0]) * ez, lim = 0.5 * (z - 1);
+    const cl = (v: number) => Math.max(-lim, Math.min(lim, v));
+    cam = { z, x: cl(-((focus?.x ?? 0.5) - 0.5) * z) * 100, y: cl(-((focus?.y ?? 0.5) - 0.5) * z) * 100 };
+  }
+  const sec = f / fps, on = (k2: MediaFx) => fx.includes(k2) && sec >= (fx_at[k2] ?? 0);
+  const shake = on("shake") ? interpolate(sec - (fx_at.shake ?? 0), [0, 0.6], [14, 0], { extrapolateRight: "clamp" }) : 0;
+  const sx = shake ? Math.sin(f * 2.7) * shake : 0, sy = shake ? Math.cos(f * 3.1) * shake : 0;
+  const origin = "50% 50%";
   const style: React.CSSProperties = { width: "100%", height: "100%", objectFit: fit, ...(focus ? { objectPosition: `${focus.x * 100}% ${focus.y * 100}%` } : {}) };
   // flicker: a soft irregular light pulse, deterministic per frame
   const fl = flicker ? 0.06 * (Math.sin(f * 0.9) * Math.sin(f * 0.37 + 1.3) > 0.55 ? 1 : 0) + 0.02 * Math.sin(f * 0.21) : 0;
@@ -105,7 +119,7 @@ const Media: React.FC<{ src: string; start?: number; fit?: "cover" | "contain"; 
       {isVideo(src) ? (
         <OffthreadVideo src={resolve(src)} startFrom={Math.round(start * fps)} muted={muted} style={style} />
       ) : (
-        <Img src={resolve(src)} style={{ ...style, transform: `translate(${cam.x}%, ${cam.y}%) scale(${cam.z})` }} />
+        <Img src={resolve(src)} style={{ ...style, transformOrigin: origin, transform: `translate(calc(${cam.x}% + ${sx}px), calc(${cam.y}% + ${sy}px)) scale(${cam.z})`, ...(fx.includes("grade") ? { filter: "contrast(1.08) saturate(1.1)" } : {}) }} />
       )}
       {flicker && <AbsoluteFill style={{ background: `rgba(0,0,0,${0.08 + fl})` }} />}
       {rain && (
@@ -115,6 +129,11 @@ const Media: React.FC<{ src: string; start?: number; fit?: "cover" | "contain"; 
         }} />
       )}
       {dim > 0 && <AbsoluteFill style={{ background: `rgba(0,0,0,${dim})` }} />}
+      {on("streaks") && <AbsoluteFill style={{ backgroundImage: "repeating-linear-gradient(0deg, rgba(255,255,255,0) 0px, rgba(255,255,255,0) 30px, rgba(255,230,210,.10) 31px, rgba(255,255,255,0) 34px)", backgroundSize: "100% 180px", transform: `translateX(${(f * 60) % 400 - 200}px)`, maskImage: "linear-gradient(90deg, transparent 10%, #000 40%, #000 60%, transparent 90%)", WebkitMaskImage: "linear-gradient(90deg, transparent 10%, #000 40%, #000 60%, transparent 90%)", mixBlendMode: "screen" }} />}
+      {on("siren_rise") && (() => { const lv = interpolate(sec, [fx_at.siren_rise ?? 0, (fx_at.siren_rise ?? 0) + 4], [0.25, 1], { extrapolateRight: "clamp" }) * siren_level; const red = Math.floor(f / 8) % 2 === 0; const a = (0.34 * lv).toFixed(3);
+        return <AbsoluteFill style={{ background: `linear-gradient(90deg, ${red ? `rgba(255,40,60,${a})` : "transparent"} 0%, transparent 38%, transparent 62%, ${red ? "transparent" : `rgba(40,110,255,${a})`} 100%)`, mixBlendMode: "screen" }} />; })()}
+      {on("flash") && <AbsoluteFill style={{ background: "#fff", opacity: interpolate(sec - (fx_at.flash ?? 0), [0, 0.3], [0.85, 0], { extrapolateRight: "clamp" }) }} />}
+      {fx.includes("vignette") && <AbsoluteFill style={{ background: "radial-gradient(ellipse at 50% 45%, transparent 50%, rgba(0,0,0,.6) 100%)" }} />}
     </AbsoluteFill>
   );
 };
@@ -320,6 +339,7 @@ export const ShotView: React.FC<{ s: Shot; t: Theme; base: number; cast?: Record
           kenburns={isMedia ? (s as any).kenburns !== false : true} muted={isMedia ? (s as any).muted !== false : true}
           move={isMedia ? (s as any).move : undefined} focus={isMedia ? (s as any).focus : undefined}
           flicker={isMedia ? (s as any).flicker : false} rain={isMedia ? (s as any).rain : false}
+          zoom={isMedia ? (s as any).zoom : undefined} fx={isMedia ? (s as any).fx : undefined} fx_at={isMedia ? (s as any).fx_at : undefined} siren_level={isMedia ? (s as any).siren_level : undefined}
           dim={isMedia ? ((s as any).headline ? 0.35 : 0) : 0.62} />
       )}
       {!bg && (

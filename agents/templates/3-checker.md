@@ -16,6 +16,7 @@ STEPS
    - loop: does the last line land and call back to the hook?
    score = round(0.3*hook + 0.2*voice + 0.15*value + 0.15*retention + 0.1*producibility + 0.1*loop, 1).
    HARD CHECKS (any failure = needs_rewrite regardless of score):
+   - Story parts: the narration never describes what the viewer can already see on screen or mentions the camera/shot ("Hood up.", "There's a man against the bins", "the camera pans" = fail; name the line); it adds only what can't be seen. Length 75-150 s.
    - Timing: spoken words / 2.6 <= post.length_s + 2; each talking generation <= 28 s of speech.
    - Spec: remotion_spec passes `node remotion/render.mjs <spec> --validate` (run it if the repo is checked out; otherwise check by hand against remotion/SPEC.md): shots[0].at = 0, highlight is an exact substring, stamp <= 7 characters, a headline overlay at 0 with the hook, watermark set.
    - Prompts: every video prompt has the REFERENCE KEY, the RELIGHT block, the identity anchors verbatim from settings.character.anchors, "ON-SCREEN TEXT: none", and a timed SHOT BREAKDOWN.

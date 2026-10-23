@@ -55,6 +55,10 @@ export type MediaShot = ShotBase & {
   focus?: { x: number; y: number }; // 0-1: the point the camera moves toward (default centre)
   flicker?: boolean; // a faint light flicker (streetlights, neon, a TV)
   rain?: boolean; // light rain streaks over the still
+  zoom?: [number, number]; // illustrated stills: scale from → to, toward focus (punch-ins, slow pushes on one part of the still)
+  fx?: ("shake" | "flash" | "siren_rise" | "streaks" | "vignette" | "grade")[]; // free effects over the still
+  fx_at?: Record<string, number>; // seconds into the shot each effect starts
+  siren_level?: number; // 0-1 strength of siren_rise
   muted?: boolean; // default true unless it is the talking clip
   headline?: string;
   highlight?: string;

@@ -1,7 +1,7 @@
 // "scene" shots: a drawn set, a stick-figure cast that walks, runs and reacts, props, weather and
 // light, under a moving camera. Everything is code, so a whole episode costs zero credits.
 import React from "react";
-import { AbsoluteFill, interpolate, random, useCurrentFrame, useVideoConfig, Easing } from "remotion";
+import { AbsoluteFill, interpolate, random, useCurrentFrame, useVideoConfig, Easing, staticFile } from "remotion";
 import { Theme } from "../types";
 import { StickFigure, Pose, Outfit, Item, Expression } from "./rig";
 import { SetView, SetName, palette, W, H, GROUND, Pal } from "./sets";
@@ -21,6 +21,8 @@ export type SceneShot = {
   camera?: { zoom?: [number, number]; x?: [number, number]; y?: [number, number]; ease?: "in" | "out" | "inout" | "linear" };
   actors?: Actor[]; props?: Prop[]; fx?: Fx[]; fx_at?: Record<string, number>; spot?: number; // spot = index of the actor the spotlight follows
   label?: string; stamp?: any; credit?: string; transition?: any;
+  bg?: string; // a painted background plate (image) drawn instead of the code-drawn set; characters animate on top
+  bg_dim?: number; // 0-1 darkening over the plate so the figures read (default 0.15)
   start_offset?: number; shot_len?: number; // set by tools/render-long.mjs when a shot spans two chunks
   relative?: boolean; // true: every at/dur inside this shot is a fraction of the shot (0-1), so it survives retiming to the voice
 };
@@ -67,7 +69,9 @@ export const Scene: React.FC<{ s: SceneShot; t: Theme; cast?: Record<string, Cas
     <AbsoluteFill style={{ background: p.sky, overflow: "hidden" }}>
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" style={{ position: "absolute", inset: 0 }}>
         <g transform={`translate(${W / 2 + sx} ${H * 0.62 + sy}) scale(${z}) translate(${-cx} ${-cy})`}>
-          <SetView name={s.set} p={p} f={f} text={s.text} lit={s.lit} flicker={flicker} />
+          {s.bg ? <><image href={/^(https?:|data:)/.test(s.bg) ? s.bg : staticFile(s.bg)} x={0} y={0} width={W} height={H} preserveAspectRatio="xMidYMid slice" opacity={flicker < 1 ? 0.85 : 1} />
+            <rect x={0} y={0} width={W} height={H} fill="#000" opacity={s.bg_dim ?? 0.15} /></>
+            : <SetView name={s.set} p={p} f={f} text={s.text} lit={s.lit} flicker={flicker} />}
           {(s.props || []).filter((pr) => pr.type === "window" || sec >= (pr.at ?? 0) * T).map((pr, i) => <PropView key={i} pr={pr} p={p} f={f} fps={fps} T={T} />)}
           {(s.actors || []).map((a, i) => {
             if (a.enter_at != null && sec < a.enter_at * T) return null;

@@ -157,6 +157,9 @@ motion and all text stay in Remotion, so a part costs only its stills.
 | `move` | `media` shot | camera move over a still: `push` (default), `pull`, `pan_left`, `pan_right`, `rise`, `fall`, `still` |
 | `focus` | `media` shot | `{x, y}` 0-1: the point the move heads for (default the centre) |
 | `flicker`, `rain` | `media` shot | a faint light flicker; light rain streaks over the still |
+| `zoom` | `media` shot | `[from, to]` scale (1-3) toward `focus`: a slow push (`[1.0, 1.1]`) or a punch-in on a detail (`[1.9, 2.05]` on a face, a hand, a window). One still can serve several shots this way. Overrides the zoom of `move` |
+| `fx` | `media` shot | free effects over the still: `shake` (decays over 0.6 s), `flash` (white pop), `siren_rise` (red-blue wash building over 4 s), `streaks` (horizontal speed lines for a runner), `vignette`, `grade` (a touch more contrast and colour) |
+| `fx_at`, `siren_level` | `media` shot | seconds into the shot each effect starts; strength of `siren_rise` (0-1; raise it shot by shot as the police get closer) |
 | `style: "poster"` | `titlecard` overlay | the series title look: `kicker` (small letter-spaced line, e.g. the season title), `number` (the part number, huge, accent colour), `text` (the part title), `sub`, `y`, `size` (0.6 on a 1280×720 thumbnail), `align` (`left`/`right`) |
 | `style: "poster"` | `choice` overlay | the matching vote card: "YOU DECIDE", the question, A/B/C tiles, the footer `sub` |
 | `grain` | top level | subtle film grain over the whole picture (also good on stick-figure parts) |

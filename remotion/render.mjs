@@ -53,6 +53,9 @@ function validate(s) {
     if (sh.type === "media" && !sh.src) errs.push(`${n}.src is required for media shots`);
     const moves = ["push", "pull", "pan_left", "pan_right", "rise", "fall", "still"];
     if (sh.type === "media" && sh.move && !moves.includes(sh.move)) errs.push(`${n}.move "${sh.move}" is not one of ${moves.join(", ")}`);
+    const mfx = ["shake", "flash", "siren_rise", "streaks", "vignette", "grade"];
+    if (sh.type === "media") for (const x of sh.fx || []) if (!mfx.includes(x)) errs.push(`${n}.fx "${x}" is not one of ${mfx.join(", ")}`);
+    if (sh.type === "media" && sh.zoom && !(Array.isArray(sh.zoom) && sh.zoom.length === 2 && sh.zoom.every((z) => z >= 1 && z <= 3))) errs.push(`${n}.zoom must be [from, to] between 1 and 3`);
     if (sh.focus && (typeof sh.focus.x !== "number" || typeof sh.focus.y !== "number")) errs.push(`${n}.focus needs x and y between 0 and 1`);
     if (sh.type === "scene") {
       if (!SETS.includes(sh.set)) errs.push(`${n}.set "${sh.set}" is not one of ${SETS.join(", ")}`);

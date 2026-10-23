@@ -22,7 +22,8 @@ const Captions: React.FC<{ words: Word[]; t: Theme; per: number; y: number; uppe
     if (brk) { chunks.push(cur); cur = []; }
   }
   if (cur.length) chunks.push(cur);
-  const chunk = chunks.find((c, i) => now >= c[0].s - 0.05 && now < (chunks[i + 1]?.[0].s ?? c[c.length - 1].e + 0.4));
+  // a chunk stays up until the next one starts, but never more than 0.6 s past its last word (no stale captions over a silence or a character's line)
+  const chunk = chunks.find((c, i) => now >= c[0].s - 0.05 && now < Math.min(chunks[i + 1]?.[0].s ?? Infinity, c[c.length - 1].e + 0.6));
   if (!chunk) return null;
   const p = spring({ frame: f - chunk[0].s * fps, fps, config: { damping: 14, mass: 0.5 } });
   return (
