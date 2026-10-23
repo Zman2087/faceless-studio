@@ -113,6 +113,7 @@ spec.audio = stage(spec.audio);
 spec.music = stage(spec.music);
 spec.ambience = stage(spec.ambience);
 for (const x of spec.sounds || []) x.src = stage(x.src);
+for (const c of Object.values(spec.cast || {})) if (c.toon?.head?.src) c.toon.head.src = stage(c.toon.head.src);
 for (const sh of spec.shots) { if (sh.src) sh.src = stage(sh.src); if (sh.bg) sh.bg = stage(sh.bg); }
 
 // ---------- browser ----------

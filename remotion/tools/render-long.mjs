@@ -27,6 +27,8 @@ const work = path.join(path.dirname(path.resolve(out)), path.basename(out, ".mp4
 fs.mkdirSync(work, { recursive: true });
 const abs = (v) => (!v || /^(https?:|data:)/.test(v) ? v : path.resolve(specDir, v));
 const files = [];
+// cast head sheets are spec-relative; chunk specs live elsewhere, so make them absolute
+for (const c of Object.values(spec.cast || {})) if (c.toon?.head?.src) c.toon.head.src = abs(c.toon.head.src);
 for (let c = 0; c < cuts.length - 1; c++) {
   const [a, b] = [cuts[c], cuts[c + 1]];
   const file = path.join(work, `chunk${String(c + 1).padStart(2, "0")}.mp4`);

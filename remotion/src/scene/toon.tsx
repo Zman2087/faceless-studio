@@ -2,11 +2,17 @@
 // (whites of the eyes, pupils that look where the character looks, brows, blinking, lip-sync from the
 // voice), clothes drawn over thin ink limbs, thick outlines and flat colours. It reuses the stick rig's
 // skeleton and poses, so every pose, walk and run works the same and the character never changes shape.
+import { staticFile } from "remotion";
 import React from "react";
 import { random } from "remotion";
-import { POSES, gait, at, rad, L, Limbs, Pose, Expression, Item } from "./rig";
+import { POSES, gait, at, rad, L, Limbs, Pose, Expression, Item , natural} from "./rig";
 
+// An illustrated head sheet: a grid of the same head in different expressions, cut out on a transparent
+// background, all cells the same size and aligned. `cells` names each cell left-to-right, top-to-bottom:
+// <expr>, <expr>_talk (mouth open) and <expr>_blink (eyes shut). The neck sits at the bottom middle.
+export type HeadSheet = { src: string; cols: number; rows: number; cells: string[]; w: number; h: number; size?: number; neck?: number };
 export type ToonLook = {
+  head?: HeadSheet;
   skin?: string;            // face and hands
   top?: string;             // hoodie / shirt / coat colour
   top_kind?: "hoodie" | "shirt" | "coat" | "scrubs";
@@ -35,8 +41,7 @@ export const Toon: React.FC<{
 }> = ({ x, ground, scale = 1, facing = "right", pose = "stand", phase = 0, blend = 1, look, expression = "neutral", item = "none", item2 = "none", talk, sec, seed = "a", gaze = 0, opacity = 1 }) => {
   const target = pose === "walk" || pose === "run" ? gait(pose, phase) : POSES[pose] || POSES.stand;
   const base = POSES.stand;
-  const j = Object.fromEntries(Object.keys(base).map((k) => [k, (base as any)[k] + ((target as any)[k] - (base as any)[k]) * blend])) as Limbs;
-  j.lean = -j.lean; // the toon leans toward the way it faces
+  const j = natural(Object.fromEntries(Object.keys(base).map((k) => [k, (base as any)[k] + ((target as any)[k] - (base as any)[k]) * blend])) as Limbs);
   // idle life: breathing and a slight sway when not moving
   const idle = pose === "walk" || pose === "run" ? 0 : Math.sin(sec * 2.1 + seed.length) * 1.6;
   const hipY = -(L.thigh + L.shin) + j.hipDrop;
@@ -82,7 +87,8 @@ export const Toon: React.FC<{
       {look.top_kind === "shirt" && <path d={`M${nx - 14} ${shoulderY - 6} L${nx} ${shoulderY + 14} L${nx + 14} ${shoulderY - 6}`} stroke={INK} strokeWidth={4} fill="#fff" />}
       {look.tie && <path d={`M${nx} ${shoulderY + 10} l-9 16 l9 64 l9 -64 Z`} fill={look.tie} stroke={INK} strokeWidth={3} />}
       {look.lanyard && <g><path d={`M${nx - 16} ${shoulderY - 4} L${nx - 4} ${shoulderY + 70} L${nx + 16} ${shoulderY - 4}`} stroke="#d94a4a" strokeWidth={5} fill="none" /><rect x={nx - 22} y={shoulderY + 66} width={34} height={44} rx={5} fill="#f4f4f4" stroke={INK} strokeWidth={3} /><rect x={nx - 16} y={shoulderY + 72} width={22} height={8} fill="#5a7bd8" /></g>}
-      {/* head */}
+      {/* head: an illustrated expression sheet when the cast has one, else the drawn head */}
+      {look.head ? <SheetHead sheet={look.head} expr={expression} open={open} blink={blink} x={nx} y={ny} tilt={j.headTilt * 0.7 + idle * 0.5} /> : <>
       <g transform={`translate(${hx} ${hy}) rotate(${j.headTilt * 0.7 + idle * 0.5})`}>
         {look.top_kind === "hoodie" && look.hood_up && <path d={`M${-headR - 18} ${30} Q${-headR - 26} ${-headR - 22} 0 ${-headR - 26} Q${headR + 26} ${-headR - 22} ${headR + 18} ${30} Q${headR} ${headR * 0.6} 0 ${headR * 0.75} Q${-headR} ${headR * 0.6} ${-headR - 18} ${30}Z`} fill={top} stroke={INK} strokeWidth={6} />}
         <circle r={headR} fill={skin} stroke={INK} strokeWidth={6} />
@@ -104,7 +110,8 @@ export const Toon: React.FC<{
         <path d={m.d} transform={`translate(4 ${36 - (open > 0.12 ? 4 : 0)})`} fill={m.fill} stroke={INK} strokeWidth={5} strokeLinejoin="round" strokeLinecap="round" />
         {open > 0.45 && <path d={`M-14 ${34} h28`} stroke="#fff" strokeWidth={5} />}
       </g>
-      {look.headphones && <g transform={`translate(${nx} ${ny + 2})`}><path d="M-46 -6 Q0 44 46 -6" stroke="#f2c230" strokeWidth={11} fill="none" /><ellipse cx={44} cy={-4} rx={18} ry={22} fill="#f2c230" stroke={INK} strokeWidth={4} /><ellipse cx={-44} cy={-4} rx={16} ry={20} fill="#d4a11c" stroke={INK} strokeWidth={4} /></g>}
+      </>}
+      {look.headphones && !look.head && <g transform={`translate(${nx} ${ny + 2})`}><path d="M-46 -6 Q0 44 46 -6" stroke="#f2c230" strokeWidth={11} fill="none" /><ellipse cx={44} cy={-4} rx={18} ry={22} fill="#f2c230" stroke={INK} strokeWidth={4} /><ellipse cx={-44} cy={-4} rx={16} ry={20} fill="#d4a11c" stroke={INK} strokeWidth={4} /></g>}
       {/* front arm and held items */}
       <ArmView a={arms[0]} top={top} skin={skin} />
       <HeldToon item={item} x={arms[0].wx} y={arms[0].wy} />
@@ -140,4 +147,24 @@ const HeldToon: React.FC<{ item: Item; x: number; y: number }> = ({ item, x, y }
   if (item === "phone") return <g transform={`translate(${x} ${y - 6})`}><circle r={80} fill="#8fd0ff" opacity={0.14} /><rect x={-20} y={-36} width={40} height={66} rx={8} fill="#1b1b1b" stroke={INK} strokeWidth={4} /><rect x={-14} y={-29} width={28} height={50} rx={4} fill="#9fd8ff" /></g>;
   if (item === "knife") return <g transform={`translate(${x} ${y}) rotate(160)`}><rect x={-9} y={-12} width={18} height={40} rx={5} fill="#3a2618" stroke={INK} strokeWidth={4} /><path d="M-9 -12 L2 -120 L11 -12 Z" fill="#e6ebf2" stroke={INK} strokeWidth={4} /><path d="M3 -100 L6 -30" stroke="#fff" strokeWidth={3} /></g>;
   return null;
+};
+
+const SheetHead: React.FC<{ sheet: HeadSheet; expr: string; open: number; blink: boolean; x: number; y: number; tilt: number }> = ({ sheet, expr, open, blink, x, y, tilt }) => {
+  const has = (n: string) => sheet.cells.includes(n);
+  const fam = has(expr) ? expr : ({ angry: "scared", calm: "neutral", smirk: "neutral" } as Record<string, string>)[expr] || "neutral";
+  let name = fam;
+  if (open > 0.22 && has(`${fam}_talk`)) name = `${fam}_talk`;
+  else if (blink && has(`${fam}_blink`)) name = `${fam}_blink`;
+  else if (blink && fam !== "shock" && has("neutral_blink")) name = "neutral_blink";
+  const i = Math.max(0, sheet.cells.indexOf(name));
+  const cw = sheet.w / sheet.cols, ch = sheet.h / sheet.rows;
+  const W = sheet.size ?? 250, H = (W * ch) / cw;
+  const src = /^(https?:|data:)/.test(sheet.src) ? sheet.src : staticFile(sheet.src);
+  return (
+    <g transform={`translate(${x} ${y + 26}) rotate(${tilt})`}>
+      <svg x={-W / 2} y={-H * (sheet.neck ?? 0.97)} width={W} height={H} viewBox={`${(i % sheet.cols) * cw} ${Math.floor(i / sheet.cols) * ch} ${cw} ${ch}`} overflow="hidden">
+        <image href={src} width={sheet.w} height={sheet.h} />
+      </svg>
+    </g>
+  );
 };

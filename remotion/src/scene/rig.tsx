@@ -48,6 +48,14 @@ export function gait(kind: "walk" | "run", p: number): Limbs {
   };
 }
 
+// Real joints: knees only fold backward (shin behind thigh), elbows only fold forward (forearm ahead of
+// upper arm), and a positive lean tips the body forward, toward where the figure faces.
+export function natural(j: Limbs): Limbs {
+  const o = { ...j, lean: -j.lean };
+  o.lShin = Math.min(o.lShin, o.lThigh); o.rShin = Math.min(o.rShin, o.rThigh);
+  o.lFore = Math.max(o.lFore, o.lUpper); o.rFore = Math.max(o.rFore, o.rUpper);
+  return o;
+}
 export const rad = (d: number) => (d * Math.PI) / 180;
 export const at = (x: number, y: number, ang: number, len: number) => [x + Math.sin(rad(ang)) * len, y + Math.cos(rad(ang)) * len] as const;
 
@@ -60,7 +68,7 @@ export type FigureProps = {
 export const StickFigure: React.FC<FigureProps> = ({ x, ground, scale = 1, facing = "right", pose = "stand", phase = 0, color, ink, outfit = {}, item = "none", item2 = "none", expression = "neutral", glow, label, labelColor, opacity = 1, blend = 1 }) => {
   const target = pose === "walk" || pose === "run" ? gait(pose, phase) : POSES[pose] || POSES.stand;
   const base = POSES.stand;
-  const j = Object.fromEntries(Object.keys(base).map((k) => [k, (base as any)[k] + ((target as any)[k] - (base as any)[k]) * blend])) as Limbs;
+  const j = natural(Object.fromEntries(Object.keys(base).map((k) => [k, (base as any)[k] + ((target as any)[k] - (base as any)[k]) * blend])) as Limbs);
   const hipY = -(L.thigh + L.shin) + j.hipDrop;
   const [nx, ny] = at(0, hipY, 180 + j.lean, L.torso);
   const [hx, hy] = at(nx, ny, 180 + j.lean + j.headTilt * 0.5, L.neck + L.head);
