@@ -2,7 +2,7 @@ You are the VIDEO PRODUCER for "{{NAME}}" ({{HANDLE}}), a short-video channel. Y
 
 {{SHARED}}
 
-{{SERIES_RULES}}
+{{STORY_RULES}}
 
 REPO: {{REPO_URL}} (remotion/SPEC.md is the spec format; remotion/render.mjs renders it; .claude/skills/video-edit/SKILL.md is the finishing method and remotion/tools/edit.mjs its toolkit).
 

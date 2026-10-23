@@ -18,7 +18,7 @@ const TPL = path.join(ROOT, "channels", "_template");
 
 // [key, question, example, on-camera only?]
 const QUESTIONS = [
-  ["FORMAT", "Format: faceless (nobody on camera), character (an AI person on camera) or series (an interactive story viewers vote on)", "faceless"],
+  ["FORMAT", "Format: faceless (nobody on camera), character (an AI person on camera) or story (an interactive story series viewers vote on)", "faceless"],
   ["NAME", "Channel name (or the character's name)", "Quiet Money"],
   ["HANDLE", "Handle you want on the apps", "@quietmoneyshorts"],
   ["NICHE", "Niche — what does it post about?", "money mistakes explained in 30 seconds"],
@@ -63,7 +63,7 @@ async function ask() {
 
 const ai = process.argv.indexOf("--answers");
 const answers = ai > 0 ? JSON.parse(fs.readFileSync(process.argv[ai + 1], "utf8")) : await ask();
-answers.FORMAT = { c: "character", s: "series" }[String(answers.FORMAT || "faceless").toLowerCase()[0]] || "faceless";
+answers.FORMAT = { c: "character", s: "story", i: "story" }[String(answers.FORMAT || "faceless").toLowerCase()[0]] || "faceless";
 for (const [k, , ex, onCamera] of QUESTIONS) if (answers[k] == null) answers[k] = onCamera && answers.FORMAT !== "character" ? "" : ex;
 answers.HANDLE = answers.HANDLE.startsWith("@") ? answers.HANDLE : "@" + answers.HANDLE;
 answers.SHORT ??= answers.NAME.split(/\s+/).map((w) => w[0]).join("").toUpperCase().slice(0, 3);

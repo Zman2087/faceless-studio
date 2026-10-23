@@ -91,12 +91,18 @@ button.plain{font:600 13px var(--body);border:1.5px solid var(--ink);background:
     <div class="case" id="caseNo">Case file · Season 1</div>
     <h1 id="title">Story map</h1>
     <p class="premise" id="premise"></p>
+    <p class="note"><b>Owner only.</b> Viewers never see the meters, the branches or the endings. They only see the story, the choice and last part's vote share.</p>
     <div class="facts" id="facts"></div>
   </header>
 
   <section aria-labelledby="playH">
     <div class="sechead"><h2 id="playH">Play it</h2><p class="note">Pick options the way the audience would. The meters, flags and endings follow exactly the rules the Showrunner uses.</p></div>
     <div class="play" id="play"></div>
+  </section>
+
+  <section aria-labelledby="bestH">
+    <div class="sechead"><h2 id="bestH">The perfect run</h2><p class="note">The shortest route to the best ending. The season finale's Route Reveal compares the audience's votes with this.</p></div>
+    <div class="play" id="best"></div>
   </section>
 
   <section aria-labelledby="rulesH">
@@ -195,17 +201,32 @@ lines.push("  classDef got fill:#dcebe0,stroke:#2e6b47,color:#17181b","  classDe
 lines.push(`  class ${got.map(e=>e.id).join(",")} got`,`  class ${cau.map(e=>e.id).join(",")} caught`);
 $("mermaid").textContent=lines.join("\n");
 
+// perfect run: best ending (map.ending_rank), then fewest parts, then lowest suspicion
+const RANK=MAP.ending_rank||[...got,...cau].map(e=>e.id);const rk=id=>{const i=RANK.indexOf(id);return i<0?RANK.length:i};
+const memo=new Map();
+function bestFrom(id,s,part,d=0){if(E[id])return{ending:id,parts:0,susp:s.suspicion,path:[]};if(d>30)return null;const key=`${id}|${s.suspicion}|${s.proof}|${[...s.flags].sort()}|${part}`;if(memo.has(key))return memo.get(key);let b=null;
+  for(const o of N[id].choice.options){const r=step(id,o,s,part);const sub=bestFrom(r.to,r.s,part+1,d+1);if(!sub)continue;const c={ending:sub.ending,parts:sub.parts+1,susp:sub.susp,path:[{node:id,o},...sub.path]};
+    if(!b||rk(c.ending)<rk(b.ending)||(rk(c.ending)===rk(b.ending)&&(c.parts<b.parts||(c.parts===b.parts&&c.susp<b.susp))))b=c}
+  memo.set(key,b);return b}
+const BEST=bestFrom(MAP.start,{suspicion:ST.suspicion.start,proof:ST.proof.start,flags:new Set()},1);
+if(BEST){$("best").innerHTML=`<div class="opts">${BEST.path.map((x,i)=>`<div class="opt" style="cursor:default"><span class="k">${esc(x.o.key)}</span><span><b>Part ${i+1} · ${esc(N[x.node].title)}</b><br>${esc(x.o.label)}</span><span class="d">${esc(delta(x.o))}</span></div>`).join("")}</div><div class="ending"><div class="case">Part ${BEST.parts+1} · Got away</div><div class="scene"><div class="t">${esc(E[BEST.ending].title)}</div><p>${esc(E[BEST.ending].final_line)}</p></div></div><p class="note">${BEST.parts} votes. ${RANK.length?"Endings are ranked best to worst: "+RANK.map(id=>esc(E[id]?.title||id)).join(" › ")+".":""}</p>`}
+
 // play lane
-let cur,state,part,trail;
-function reset(){cur=MAP.start;state={suspicion:ST.suspicion.start,proof:ST.proof.start,flags:new Set()};part=1;trail=[];draw()}
+let cur,state,part,trail,hist;
+function reset(){cur=MAP.start;state={suspicion:ST.suspicion.start,proof:ST.proof.start,flags:new Set()};part=1;trail=[];hist=[];draw()}
+function reveal(){ // the same comparison the Route Reveal episode makes
+  let matched=0,turn=null;
+  for(const h of hist){const bh=bestFrom(h.id,h.s,h.part);const o=N[h.id].choice.options.find(x=>x.key===h.key);const r=step(h.id,o,h.s,h.part);const ba=bestFrom(r.to,r.s,h.part+1);
+    if(bh.path[0].o.key===h.key)matched++;if(!turn&&rk(ba.ending)>rk(bh.ending))turn={part:h.part,title:N[h.id].title,chose:o.label,best:bh.path[0].o.label,lost:E[bh.ending].title}}
+  return `<div class="trail" style="color:var(--ink)"><b>Route reveal:</b> ${matched} of ${hist.length} votes matched the best move. ${turn?`Turning point: Part ${turn.part} (${esc(turn.title)}). "${esc(turn.chose)}" cost you ${esc(turn.lost)}; "${esc(turn.best)}" kept it.`:"You never lost ground."}</div>`}
 function draw(){
   const el=$("play");const meters=`<div class="meters"><div class="m"><div class="lbl"><span>${esc(ST.suspicion.label)}</span><span>${state.suspicion}%</span></div><div class="bar"><i style="width:${state.suspicion}%"></i></div></div><div class="m"><div class="lbl"><span>${esc(ST.proof.label)}</span><span>${state.proof}%</span></div><div class="bar proof"><i style="width:${state.proof}%"></i></div></div></div>`;
   const tr=trail.length?`<div class="trail">${trail.map(esc).join("  ›  ")}</div>`:"";
-  if(E[cur]){const e=E[cur];el.innerHTML=meters+`<div class="ending ${e.type==="caught"?"caught":""}"><div class="case">Part ${part} · ${e.type==="caught"?"Caught":"Got away"}</div><div class="scene"><div class="t">${esc(e.title)}</div><p>${esc(e.summary)}</p><p><b>${esc(e.final_line)}</b></p></div></div>${tr}<div class="row"><button type="button" class="plain" id="again">Play again</button></div>`;$("again").onclick=reset;return}
+  if(E[cur]){const e=E[cur];el.innerHTML=meters+reveal()+`<div class="ending ${e.type==="caught"?"caught":""}"><div class="case">Part ${part} · ${e.type==="caught"?"Caught":"Got away"}</div><div class="scene"><div class="t">${esc(e.title)}</div><p>${esc(e.summary)}</p><p><b>${esc(e.final_line)}</b></p></div></div>${tr}<div class="row"><button type="button" class="plain" id="again">Play again</button></div>`;$("again").onclick=reset;return}
   const n=N[cur];
   el.innerHTML=meters+`<div class="scene"><div class="case">Part ${part} · ${esc(n.id)}${state.flags.size?" · flags: "+esc([...state.flags].join(", ")):""}</div><div class="t">${esc(n.title)}</div><p>${esc(n.summary)}</p><p class="q">${esc(n.choice.text)}</p></div>
   <div class="opts">${n.choice.options.map((o,i)=>`<button type="button" class="opt" data-i="${i}" id="opt-${esc(n.id)}-${esc(o.key)}"><span class="k">${esc(o.key)}</span><span>${esc(o.label)}</span><span class="d">${esc(delta(o))}</span></button>`).join("")}</div>${tr}<div class="row"><button type="button" class="plain" id="restart">Start over</button></div>`;
-  el.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{const o=n.choice.options[+b.dataset.i];const r=step(cur,o,state,part);trail.push(`${n.id} ${o.key}`);state=r.s;cur=r.to;part++;draw()});
+  el.querySelectorAll(".opt").forEach(b=>b.onclick=()=>{const o=n.choice.options[+b.dataset.i];hist.push({id:cur,s:state,part,key:o.key});const r=step(cur,o,state,part);trail.push(`${n.id} ${o.key}`);state=r.s;cur=r.to;part++;draw()});
   $("restart").onclick=reset;
 }
 reset();

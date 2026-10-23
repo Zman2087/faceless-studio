@@ -35,7 +35,8 @@ function validate(s) {
   const errs = [];
   if (!(s.duration > 0)) errs.push("duration must be > 0 seconds");
   if (!Array.isArray(s.shots) || !s.shots.length) errs.push("shots must be a non-empty array");
-  const types = ["title", "number", "bars", "list", "timeline", "quote", "media", "compare", "chat", "kinetic"];
+  const types = ["scene", "title", "number", "bars", "list", "timeline", "quote", "media", "compare", "chat", "kinetic"];
+  const SETS = ["lane", "street", "docks", "station", "interview", "kitchen", "road", "rooftop", "office", "blank"];
   const transitions = ["fade", "cut", "slide", "zoom", "wipe"];
   let last = -1;
   (s.shots || []).forEach((sh, i) => {
@@ -49,6 +50,13 @@ function validate(s) {
     if (hl && hl[1] && !(hl[0] || "").includes(hl[1])) errs.push(`${n}.highlight "${hl[1]}" is not an exact substring of its headline`);
     if (sh.stamp && String(sh.stamp.text).length > 7) errs.push(`${n}.stamp.text must be 7 characters or fewer`);
     if (sh.type === "media" && !sh.src) errs.push(`${n}.src is required for media shots`);
+    if (sh.type === "scene") {
+      if (!SETS.includes(sh.set)) errs.push(`${n}.set "${sh.set}" is not one of ${SETS.join(", ")}`);
+      (sh.actors || []).forEach((a, k) => {
+        if (typeof a.x !== "number") errs.push(`${n}.actors[${k}].x must be a number (0-1080)`);
+        if (a.cast && !(s.cast || {})[a.cast]) errs.push(`${n}.actors[${k}].cast "${a.cast}" is not in spec.cast`);
+      });
+    }
     if (sh.type === "number" && typeof sh.value !== "number") errs.push(`${n}.value must be a number`);
     if (["bars", "list", "timeline"].includes(sh.type) && !(sh.items || []).length) errs.push(`${n}.items must not be empty`);
     if (sh.transition && !transitions.includes(sh.transition)) errs.push(`${n}.transition "${sh.transition}" is not one of ${transitions.join(", ")}`);
@@ -66,6 +74,7 @@ function validate(s) {
       if (ops.some((x) => !x.key || !x.label || x.label.length > 40)) errs.push(`overlays[${i}] choice options need a key and a label of 40 characters or fewer`);
       if ((o.text || "").length > 70) errs.push(`overlays[${i}] choice text must be 70 characters or fewer`);
     }
+    if (o.type === "routes" && (!Array.isArray(o.lanes) || o.lanes.length < 1 || o.lanes.length > 2 || o.lanes.some((l) => !l.steps?.length || l.steps.length > 12))) errs.push(`overlays[${i}] routes needs 1-2 lanes of 1-12 steps`);
     if (o.type === "meter" && !(o.value >= 0 && o.value <= 100)) errs.push(`overlays[${i}] meter value must be 0-100`);
     if (o.type === "cameo") {
       const hs = o.handles || [];
@@ -93,6 +102,7 @@ const stage = (v) => {
 };
 spec.audio = stage(spec.audio);
 spec.music = stage(spec.music);
+for (const x of spec.sounds || []) x.src = stage(x.src);
 for (const sh of spec.shots) { if (sh.src) sh.src = stage(sh.src); if (sh.bg) sh.bg = stage(sh.bg); }
 
 // ---------- browser ----------

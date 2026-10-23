@@ -58,10 +58,10 @@ Connect Higgsfield when Claude asks:
 The first finished video lands after the next producer run (or say **"make the first video now"**).
 
 ## Interactive story series
-Pick "series" as the format and you get a choose-what-happens story instead of a host: every part
-ends on an A/B/C choice viewers vote on in the comments, a **Showrunner** agent follows a pre-written
-branching map (every path ends with the hero getting away or getting caught), and paid **cameo
-passes** put buyers' handles inside scenes. See [docs/STORY-SERIES.md](docs/STORY-SERIES.md).
+Pick "interactive story" as the format and you get a choose-what-happens series instead of a host:
+every part ends on an A/B/C choice viewers vote on in the comments, a **Showrunner** agent follows a
+pre-written branching map (every path ends with the hero getting away or getting caught), and paid
+**cameo passes** put buyers' handles inside scenes. See [docs/STORY-SERIES.md](docs/STORY-SERIES.md).
 
 ## Your daily routine
 Open the studio page → **Ready to post** → download the video and cover → copy each app's caption →

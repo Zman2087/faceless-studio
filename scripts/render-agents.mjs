@@ -25,19 +25,21 @@ repo = repo.replace(/^git@github\.com:/, "https://github.com/").replace(/\.git$/
 
 const T = path.join(ROOT, "agents", "templates");
 const shared = fs.readFileSync(path.join(T, "_shared.md"), "utf8");
-const fmt = settings.format || "faceless";
-const seriesRules = fmt === "series" ? fs.readFileSync(path.join(T, "_series.md"), "utf8").trim() : "";
+if (settings.format === "series") settings.format = "story"; // older name
+const isStory = settings.format === "story";
+const storyRules = isStory ? fs.readFileSync(path.join(T, "_story.md"), "utf8").trim() : "";
 const vars = {
   NAME: settings.name, HANDLE: settings.handle, SHORT: settings.short || settings.name.slice(0, 3).toUpperCase(),
   PLATFORMS: (settings.platforms || []).join(", "), TRACKER_URL: tracker, REPO_URL: repo, TIMEZONE: settings.timezone || "UTC",
 };
-const fill = (s) => s.replace(/\n*\{\{SERIES_RULES\}\}/g, seriesRules ? "\n\n" + seriesRules : "").replace(/\{\{SHARED\}\}/g, shared.trim()).replace(/\{\{([A-Z_]+)\}\}/g, (m, k) => vars[k] ?? m);
+const fill = (s) => s.replace(/\n*\{\{STORY_RULES\}\}/g, storyRules ? "\n\n" + storyRules : "").replace(/\{\{SHARED\}\}/g, shared.trim()).replace(/\{\{([A-Z_]+)\}\}/g, (m, k) => vars[k] ?? m);
 
 const sched = JSON.parse(fs.readFileSync(path.join(ROOT, "agents", "schedule.json"), "utf8"));
 const out = [];
 fs.mkdirSync(path.join(dir, "agents"), { recursive: true });
 for (const a of sched.agents) {
-  if (a.only_formats && !a.only_formats.includes(fmt)) continue; // e.g. the Showrunner runs series only
+  const fmt = settings.format || "character";
+  if (a.only_formats && !a.only_formats.includes(fmt)) continue;
   if (a.skip_formats && a.skip_formats.includes(fmt)) continue;
   const prompt = fill(fs.readFileSync(path.join(T, a.file), "utf8"));
   const left = prompt.match(/\{\{[A-Z_]+\}\}/g);

@@ -1,0 +1,449 @@
+{
+  "duration": 16,
+  "theme": {
+    "bg": "#05070d",
+    "accent": "#FFD23F",
+    "danger": "#FF4D4D"
+  },
+  "audio": "assets/stand-in-voice.mp3",
+  "cast": {
+    "you": {
+      "color": "#FFD23F",
+      "outfit": {
+        "hood": true
+      }
+    },
+    "daniel": {
+      "color": "#7fa8d8",
+      "outfit": {
+        "tie": true,
+        "hair": "short"
+      }
+    },
+    "mercer": {
+      "color": "#b8b8b8",
+      "outfit": {
+        "hood": true,
+        "gloves": true
+      }
+    },
+    "lena": {
+      "color": "#c9a2e0",
+      "outfit": {
+        "hair": "bun",
+        "glasses": true
+      }
+    }
+  },
+  "words": [
+    {
+      "w": "Eleven",
+      "s": 0.2,
+      "e": 0.55
+    },
+    {
+      "w": "forty.",
+      "s": 0.55,
+      "e": 1.0
+    },
+    {
+      "w": "You",
+      "s": 1.3,
+      "e": 1.45
+    },
+    {
+      "w": "take",
+      "s": 1.45,
+      "e": 1.7
+    },
+    {
+      "w": "the",
+      "s": 1.7,
+      "e": 1.8
+    },
+    {
+      "w": "shortcut.",
+      "s": 1.8,
+      "e": 2.5
+    },
+    {
+      "w": "A",
+      "s": 4.1,
+      "e": 4.2
+    },
+    {
+      "w": "scream.",
+      "s": 4.2,
+      "e": 4.8
+    },
+    {
+      "w": "He",
+      "s": 5.3,
+      "e": 5.45
+    },
+    {
+      "w": "presses",
+      "s": 5.45,
+      "e": 5.85
+    },
+    {
+      "w": "a",
+      "s": 5.85,
+      "e": 5.95
+    },
+    {
+      "w": "phone",
+      "s": 5.95,
+      "e": 6.3
+    },
+    {
+      "w": "into",
+      "s": 6.3,
+      "e": 6.5
+    },
+    {
+      "w": "your",
+      "s": 6.5,
+      "e": 6.7
+    },
+    {
+      "w": "hand.",
+      "s": 6.7,
+      "e": 7.2
+    },
+    {
+      "w": "Someone",
+      "s": 7.7,
+      "e": 8.1
+    },
+    {
+      "w": "runs.",
+      "s": 8.1,
+      "e": 8.6
+    },
+    {
+      "w": "Same",
+      "s": 8.9,
+      "e": 9.2
+    },
+    {
+      "w": "hoodie",
+      "s": 9.2,
+      "e": 9.6
+    },
+    {
+      "w": "as",
+      "s": 9.6,
+      "e": 9.75
+    },
+    {
+      "w": "yours.",
+      "s": 9.75,
+      "e": 10.3
+    },
+    {
+      "w": "A",
+      "s": 10.6,
+      "e": 10.7
+    },
+    {
+      "w": "window.",
+      "s": 10.7,
+      "e": 11.2
+    },
+    {
+      "w": "She",
+      "s": 11.4,
+      "e": 11.6
+    },
+    {
+      "w": "saw",
+      "s": 11.6,
+      "e": 11.9
+    },
+    {
+      "w": "you.",
+      "s": 11.9,
+      "e": 12.4
+    }
+  ],
+  "shots": [
+    {
+      "at": 0,
+      "type": "scene",
+      "set": "lane",
+      "fx": [
+        "rain"
+      ],
+      "camera": {
+        "zoom": [
+          1.0,
+          1.12
+        ],
+        "x": [
+          540,
+          600
+        ]
+      },
+      "actors": [
+        {
+          "cast": "you",
+          "x": 180,
+          "move": {
+            "to": 560,
+            "at": 0,
+            "dur": 4,
+            "gait": "walk"
+          }
+        }
+      ]
+    },
+    {
+      "at": 4,
+      "type": "scene",
+      "set": "lane",
+      "fx": [
+        "rain",
+        "flicker"
+      ],
+      "camera": {
+        "zoom": [
+          1.5,
+          1.7
+        ],
+        "x": [
+          640,
+          640
+        ],
+        "y": [
+          1300,
+          1300
+        ]
+      },
+      "props": [
+        {
+          "type": "bin",
+          "x": 860
+        }
+      ],
+      "actors": [
+        {
+          "cast": "daniel",
+          "x": 760,
+          "pose": "slumped",
+          "facing": "left",
+          "expression": "sad",
+          "then": [
+            {
+              "at": 1.2,
+              "pose": "slumped_reach"
+            },
+            {
+              "at": 2.6,
+              "pose": "slumped"
+            }
+          ]
+        },
+        {
+          "cast": "you",
+          "x": 470,
+          "move": {
+            "to": 600,
+            "at": 0,
+            "dur": 0.6,
+            "gait": "run"
+          },
+          "then": [
+            {
+              "at": 0.6,
+              "pose": "crouch",
+              "expression": "shock"
+            },
+            {
+              "at": 2.6,
+              "pose": "crouch",
+              "item": "phone"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "at": 7.5,
+      "type": "scene",
+      "set": "lane",
+      "fx": [
+        "rain",
+        "flash"
+      ],
+      "fx_at": {
+        "flash": 0.1
+      },
+      "camera": {
+        "zoom": [
+          1.25,
+          1.35
+        ],
+        "x": [
+          540,
+          520
+        ]
+      },
+      "props": [
+        {
+          "type": "knife",
+          "x": 610,
+          "y": 1545
+        }
+      ],
+      "actors": [
+        {
+          "cast": "mercer",
+          "x": 1100,
+          "move": {
+            "to": -200,
+            "at": 0.1,
+            "dur": 1.6,
+            "gait": "run"
+          }
+        },
+        {
+          "cast": "you",
+          "x": 560,
+          "pose": "crouch",
+          "expression": "scared",
+          "item": "phone",
+          "then": [
+            {
+              "at": 1.2,
+              "pose": "stand",
+              "item": "knife",
+              "facing": "left",
+              "expression": "shock"
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "at": 10.4,
+      "type": "scene",
+      "set": "lane",
+      "fx": [
+        "rain"
+      ],
+      "camera": {
+        "zoom": [
+          1.2,
+          1.9
+        ],
+        "x": [
+          700,
+          870
+        ],
+        "y": [
+          1250,
+          780
+        ]
+      },
+      "actors": [
+        {
+          "cast": "lena",
+          "x": 870,
+          "y": 860,
+          "scale": 0.45,
+          "facing": "left",
+          "pose": "stand",
+          "expression": "shock",
+          "then": [
+            {
+              "at": 1.0,
+              "pose": "point"
+            }
+          ]
+        },
+        {
+          "cast": "you",
+          "x": 560,
+          "pose": "stand",
+          "item": "knife",
+          "expression": "shock"
+        }
+      ]
+    },
+    {
+      "at": 12.6,
+      "type": "scene",
+      "set": "blank",
+      "fx": [
+        "sirens",
+        "heartbeat"
+      ],
+      "camera": {
+        "zoom": [
+          2.4,
+          2.6
+        ],
+        "x": [
+          540,
+          540
+        ],
+        "y": [
+          1260,
+          1260
+        ]
+      },
+      "actors": [
+        {
+          "cast": "you",
+          "x": 540,
+          "pose": "stand",
+          "item": "knife",
+          "expression": "scared",
+          "facing": "right"
+        }
+      ]
+    }
+  ],
+  "overlays": [
+    {
+      "at": 0,
+      "end": 3.6,
+      "type": "titlecard",
+      "text": "You're the|only witness.",
+      "sub": "Part 1"
+    },
+    {
+      "at": 4.4,
+      "end": 7.4,
+      "type": "cameo",
+      "text": "Neighbours who heard it",
+      "handles": [
+        "@yourhandle",
+        "@another.one"
+      ]
+    },
+    {
+      "at": 12.6,
+      "end": 16,
+      "type": "choice",
+      "text": "Sirens in ninety seconds. What do you do?",
+      "options": [
+        {
+          "key": "A",
+          "label": "Run"
+        },
+        {
+          "key": "B",
+          "label": "Stay and call triple zero"
+        },
+        {
+          "key": "C",
+          "label": "Wipe the knife and walk away"
+        }
+      ],
+      "sub": "Comment A, B or C"
+    }
+  ],
+  "watermark": "@theonlywitness"
+}

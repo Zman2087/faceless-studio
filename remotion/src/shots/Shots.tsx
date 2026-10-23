@@ -1,4 +1,5 @@
 import React from "react";
+import { Scene } from "../scene/Scene";
 import {
   AbsoluteFill, Img, OffthreadVideo, interpolate, spring, useCurrentFrame, useVideoConfig, staticFile,
 } from "remotion";
@@ -270,7 +271,8 @@ const Kinetic: React.FC<{ s: Extract<Shot, { type: "kinetic" }>; t: Theme; insta
 };
 
 // Renders one shot; `base` = the shot's start time (for stamp offsets).
-export const ShotView: React.FC<{ s: Shot; t: Theme; base: number }> = ({ s, t, base }) => {
+export const ShotView: React.FC<{ s: Shot; t: Theme; base: number; cast?: Record<string, any> }> = ({ s, t, base, cast }) => {
+  if (s.type === "scene") return <><Scene s={s} t={t} cast={cast} />{s.stamp && <StampMark s={s.stamp} t={t} base={base} />}<Credit text={s.credit} /></>;
   const isMedia = s.type === "media";
   const bg = isMedia ? (s as any).src : s.bg;
   let body: React.ReactNode = null;

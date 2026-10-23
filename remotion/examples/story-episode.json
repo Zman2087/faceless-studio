@@ -141,14 +141,6 @@
     },
     {
       "at": 4.2,
-      "end": 8.4,
-      "type": "meter",
-      "text": "Police suspicion",
-      "from": 20,
-      "value": 62
-    },
-    {
-      "at": 4.2,
       "end": 8.2,
       "type": "cameo",
       "text": "Neighbours who heard it",

@@ -29,9 +29,24 @@ node scripts/story-map-check.mjs channels/<slug>/story-map.json   # every path, 
 node scripts/build-story-map.mjs <slug>                              # readable + playable map page to publish
 ```
 
-Tracker documents: `settings/channel` (with `format: "series"` and a `story` block: cast, look,
-stakes, canon, position, vote, cameo), `story/map` (the map JSON), `posts/p-NNN` (one per part, format `"part"`, with
+Tracker documents: `settings/channel` (with `format: "story"` and a `story` block: cast, look,
+stakes, canon, position, vote, cameo), `story/map` (the map JSON), `posts/p-NNN` (one per part, with
 `choice`, `cameos`, `vote.counts`), `cameos/c-*` (queued → scheduled → featured).
+
+## The Route Reveal (end of season)
+After the finale and its season-two vote, the Showrunner plans one bonus episode comparing the
+route the audience voted for with the **perfect run** (the shortest route to the best ending in
+`ending_rank`). It names the **turning point** (the first vote that took a better ending off the
+table, with the real vote share), the **close calls** (votes the audience won by under 60% that
+weren't the best move) and how many votes matched the best move from where the audience was.
+
+```bash
+node scripts/story-route-compare.mjs channels/<slug>/story-map.json \
+  --route "S1:A,R1:A,D1:A,D2:C,DEAL1:A" --pct "S1:A=58,R1:A=64,D1:A=71,D2:C=52,DEAL1:A=67" --spec reveal.json
+```
+The Showrunner runs the same thing from `settings.story.canon` (`--canon`), and `--spec` writes the
+Remotion spec with the side-by-side route board. The map page shows the perfect run, and playing
+it to an ending shows the same comparison.
 
 ## Cameo passes
 - Sell on Gumroad (or Stripe Payment Links) with a required custom field "Your Instagram/TikTok handle".

@@ -28,39 +28,26 @@ const words = wordsFile ? JSON.parse(fs.readFileSync(wordsFile, "utf8")) : Array
 const beats = b.beats || [];
 if (!beats.length) { console.error("beats.json has no beats"); process.exit(1); }
 
-// Number words and digits compare equal: the script says "forty", the transcript writes "40".
-const UNITS = ["zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "ten", "eleven", "twelve", "thirteen", "fourteen", "fifteen", "sixteen", "seventeen", "eighteen", "nineteen"];
-const TENS = { twenty: 20, thirty: 30, forty: 40, fifty: 50, sixty: 60, seventy: 70, eighty: 80, ninety: 90 };
-const norm = (w) => {
-  const x = String(w).toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "");
-  if (UNITS.includes(x)) return String(UNITS.indexOf(x));
-  if (x === "hundred") return "100";
-  const m = x.match(/^(twenty|thirty|forty|fifty|sixty|seventy|eighty|ninety)(one|two|three|four|five|six|seven|eight|nine)?$/);
-  return m ? String(TENS[m[1]] + (m[2] ? UNITS.indexOf(m[2]) : 0)) : x;
-};
+const norm = (w) => String(w).toLowerCase().replace(/[^\p{L}\p{N}]+/gu, "");
 const tokens = (s) => String(s || "").split(/\s+/).map(norm).filter(Boolean);
 
 // ---------- timing: [start, end] per beat ----------
 let times = [];
 if (words?.length) {
-  // Walk the transcript in order; each beat starts at its first word and ends where the next beat starts
-  // (word counts differ between script and transcript: "forty percent" vs "40%").
+  // Walk the transcript in order; each beat starts at its first word (fuzzy: skips misheard words).
   const tw = words.map((w) => norm(w.w));
-  const starts = [];
   let k = 0;
   for (const beat of beats) {
     const t = tokens(beat.say);
-    const hi = Math.min(tw.length, k + t.length + 8);
-    // the beat's first word, else its second (the first may be misheard), else straight after the last beat
-    const find = (w, from) => { for (let j = from; j < hi; j++) if (tw[j] === w) return j; return -1; };
-    let start = find(t[0], k);
-    if (start < 0 && t[1]) { const j = find(t[1], k + 1); if (j > 0) start = j - 1; }
-    if (start < 0) start = k;
-    start = Math.min(start, tw.length - 1);
-    starts.push(start);
-    k = start + Math.max(1, Math.floor(t.length * 0.6)); // the next beat can't start inside the first part of this one
+    // look a few words ahead for the beat's first word, then its second (the first may be misheard)
+    const near = (w, from) => { for (let j = from; j < Math.min(tw.length, k + 6); j++) if (tw[j] === w) return j; return -1; };
+    let start = near(t[0], k);
+    if (start < 0 && t[1]) { const j = near(t[1], k + 1); if (j > 0) start = j - 1; }
+    if (start < 0) start = k; // not found: assume it follows straight on
+    const endIdx = Math.min(tw.length - 1, start + Math.max(0, t.length - 1));
+    times.push([words[start]?.s ?? 0, words[endIdx]?.e ?? 0]);
+    k = endIdx + 1;
   }
-  times = starts.map((s, i) => [words[s].s, words[i + 1 < starts.length ? Math.max(s, starts[i + 1] - 1) : words.length - 1].e]);
 } else {
   let at = 0.2; // a breath before the first word
   for (const beat of beats) {
@@ -96,6 +83,27 @@ beats.forEach((beat, i) => {
   }
   if (beat.overlay) spec.overlays.push({ ...beat.overlay, at: +(i === 0 ? 0 : s).toFixed(2), end: +next.toFixed(2) });
 });
+// Story series extras: a character speaking (speech bubble), cameo lists, sound cues, the title card and the vote card.
+beats.forEach((beat, i) => {
+  const [s0] = times[i];
+  const next = i + 1 < beats.length ? times[i + 1][0] : duration;
+  const at = +(i === 0 ? 0 : s0).toFixed(2);
+  if (beat.speaker && beat.speaker !== "narrator") {
+    const who = (b.cast_names || {})[beat.speaker] || beat.speaker;
+    spec.overlays.push({ at, end: +next.toFixed(2), type: "bubble", text: beat.say, sub: who, x: beat.bubble?.x ?? 540, y: beat.bubble?.y ?? 380, tail: beat.bubble?.tail ?? 0.5, color: beat.bubble?.color || "accent" });
+  }
+  if (beat.cameo) spec.overlays.push({ at, end: +next.toFixed(2), type: "cameo", text: beat.cameo.text, handles: beat.cameo.handles });
+  for (const snd of [].concat(beat.sound || [])) (spec.sounds = spec.sounds || []).push({ src: snd.src, at: +(at + (snd.offset || 0)).toFixed(2), volume: snd.volume ?? 0.8 });
+});
+if (b.cast) spec.cast = b.cast;
+if (b.titlecard?.text) spec.overlays.unshift({ at: 0, end: +Math.min(times[0][1] + 0.5, 3.8).toFixed(2), type: "titlecard", text: b.titlecard.text, sub: b.titlecard.sub });
+if (b.choice?.options) {
+  const hold = b.choice.hold ?? 3.5; // the card stays up after the last word so people can read and comment
+  spec.duration = +(Math.max(spec.duration, times[times.length - 1][1] + hold)).toFixed(2);
+  const lastShot = spec.shots[spec.shots.length - 1];
+  spec.overlays.push({ at: +times[times.length - 1][0].toFixed(2), end: spec.duration, type: "choice", text: b.choice.text, options: b.choice.options, sub: b.choice.sub || (b.choice.options.length > 2 ? "Comment A, B or C" : "Comment A or B") });
+  if (lastShot && lastShot.at >= spec.duration) console.error("the last shot starts after the end");
+}
 if (!spec.shots.length || spec.shots[0].at !== 0) { console.error("the first beat must have a shot (it is the hook frame)"); process.exit(1); }
 if (b.hook?.text) spec.overlays.unshift({ at: 0, end: +Math.min(times[0][1] + 0.3, 3).toFixed(2), type: "headline", text: b.hook.text, ...(b.hook.highlight && { highlight: b.hook.highlight }), y: b.hook.y ?? 220 });
 if (b.cta?.text) spec.overlays.push({ at: +Math.max(0, duration - 2.5).toFixed(2), end: duration, type: "lowerthird", text: b.cta.text, ...(b.cta.sub && { sub: b.cta.sub }) });

@@ -74,15 +74,19 @@ export type KineticShot = ShotBase & {
   per_word?: number; // seconds between words (default 0.18)
 };
 
-export type Shot = TitleShot | NumberShot | BarsShot | ListShot | TimelineShot | QuoteShot | MediaShot | CompareShot | ChatShot | KineticShot;
+import type { SceneShot, CastMember } from "./scene/Scene";
+export type { SceneShot, CastMember };
+export type Shot = SceneShot | TitleShot | NumberShot | BarsShot | ListShot | TimelineShot | QuoteShot | MediaShot | CompareShot | ChatShot | KineticShot;
 
 export type Overlay = {
   at: number;
   end?: number;
-  type: "textover" | "stamp" | "headline" | "lowerthird" | "titlecard" | "choice" | "cameo" | "meter";
+  type: "textover" | "stamp" | "headline" | "lowerthird" | "titlecard" | "choice" | "cameo" | "meter" | "routes" | "bubble";
+  x?: number; tail?: number; // bubble: position of the balloon, tail position 0-1
+  lanes?: { label: string; ending: string; type?: "got_away" | "caught"; steps: { part: number; key: string; label: string; pct?: number | null; best?: boolean; turning?: boolean }[] }[]; // routes: route reveal
   value?: number; // meter: 0-100 now
-  from?: number; // meter: value at the end of last part
-  options?: { key: string; label: string }[]; // choice: the A/B/C options
+  from?: number; // meter: value at the end of last episode
+  options?: { key: string; label: string }[]; // choice: the A/B options
   handles?: string[]; // cameo: buyer handles shown in-world
   text: string;
   highlight?: string;
@@ -92,6 +96,8 @@ export type Overlay = {
 };
 
 export type Spec = {
+  sounds?: { src: string; at: number; volume?: number }[]; // sound effects / extra voice takes, placed by time
+  cast?: Record<string, CastMember>; // scene shots: the series cast (colour + outfit per character id)
   duration: number; // seconds
   width?: number;
   height?: number;

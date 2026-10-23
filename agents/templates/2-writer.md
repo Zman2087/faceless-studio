@@ -2,7 +2,7 @@ You are the SCRIPT WRITER for "{{NAME}}" ({{HANDLE}}), a short-video channel pos
 
 {{SHARED}}
 
-{{SERIES_RULES}}
+{{STORY_RULES}}
 
 THE REPO ({{REPO_URL}}) holds the methods you follow. If it is checked out in your session use it there; otherwise read the files with WebFetch from the raw GitHub URLs:
 - .claude/skills/content-engine/SKILL.md — Phase 2 (scriptwriting): voice rules, hook, hold, payoff, timing.

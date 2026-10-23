@@ -1,12 +1,62 @@
 {
-  "_note": "Times are local to settings.timezone. Minutes are deliberately off the hour (busy servers at :00). Each agent runs in a fresh cloud session with the Higgsfield (and optionally ElevenLabs) connectors enabled and this repo attached. Series channels (format 'series') swap the weekly Planner for the daily Showrunner, which closes each vote and plans the next part.",
+  "_note": "Times are local to settings.timezone. Minutes are deliberately off the hour (busy servers at :00). Each agent runs in a fresh cloud session with the Higgsfield (and optionally ElevenLabs) connectors enabled and this repo attached. Story series (format 'story') swap the weekly Planner for the daily Showrunner, which closes each vote and plans the next part.",
   "agents": [
-    { "file": "1-planner.md",    "name": "{{SHORT}} 1 · Planner (weekly)",      "cron": "52 18 * * 0", "spends_credits": false, "skip_formats": ["series"] },
-    { "file": "7-showrunner.md", "name": "{{SHORT}} 0 · Showrunner (daily)",     "cron": "47 4 * * *",  "spends_credits": false, "only_formats": ["series"] },
-    { "file": "2-writer.md",     "name": "{{SHORT}} 2 · Script writer (daily)", "cron": "47 5 * * *",  "spends_credits": false },
-    { "file": "3-checker.md",    "name": "{{SHORT}} 3 · Script checker (daily)","cron": "41 7 * * *",  "spends_credits": false },
-    { "file": "4-producer.md",   "name": "{{SHORT}} 4 · Video producer (daily)","cron": "43 9 * * *",  "spends_credits": true },
-    { "file": "5-qa.md",         "name": "{{SHORT}} 5 · QA and post copy (daily)","cron": "47 15 * * *","spends_credits": false },
-    { "file": "6-strategist.md", "name": "{{SHORT}} 6 · Growth strategist (monthly)","cron": "13 10 1 * *","spends_credits": false }
+    {
+      "file": "1-planner.md",
+      "name": "{{SHORT}} 1 \u00b7 Planner (weekly)",
+      "cron": "52 18 * * 0",
+      "spends_credits": false,
+      "skip_formats": [
+        "story"
+      ]
+    },
+    {
+      "file": "7-showrunner.md",
+      "name": "{{SHORT}} 0 \u00b7 Showrunner (daily)",
+      "cron": "47 4 * * *",
+      "spends_credits": false,
+      "only_formats": [
+        "story"
+      ]
+    },
+    {
+      "file": "2-writer.md",
+      "name": "{{SHORT}} 2 \u00b7 Script writer (daily)",
+      "cron": "47 5 * * *",
+      "spends_credits": false
+    },
+    {
+      "file": "3-checker.md",
+      "name": "{{SHORT}} 3 \u00b7 Script checker (daily)",
+      "cron": "41 7 * * *",
+      "spends_credits": false
+    },
+    {
+      "file": "4-producer.md",
+      "name": "{{SHORT}} 4 \u00b7 Video producer (daily)",
+      "cron": "43 9 * * *",
+      "spends_credits": true
+    },
+    {
+      "file": "5-qa.md",
+      "name": "{{SHORT}} 5 \u00b7 QA and post copy (daily)",
+      "cron": "47 15 * * *",
+      "spends_credits": false
+    },
+    {
+      "file": "6-strategist.md",
+      "name": "{{SHORT}} 6 \u00b7 Growth strategist (monthly)",
+      "cron": "13 10 1 * *",
+      "spends_credits": false
+    },
+    {
+      "file": "8-developer.md",
+      "name": "{{SHORT}} 7 \u00b7 Series developer (weekly)",
+      "cron": "19 11 * * 3",
+      "spends_credits": false,
+      "only_formats": [
+        "story"
+      ]
+    }
   ]
 }

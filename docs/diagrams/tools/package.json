@@ -1,0 +1,14 @@
+{
+  "name": "faceless-studio-diagrams",
+  "private": true,
+  "type": "module",
+  "description": "Turn diagram sketches (*.diagram.json) into Excalidraw files and SVGs, headlessly.",
+  "scripts": { "build": "node render.mjs --all" },
+  "dependencies": {
+    "@excalidraw/excalidraw": "0.18.1",
+    "esbuild": "0.25.10",
+    "playwright-core": "1.55.1",
+    "react": "19.1.0",
+    "react-dom": "19.1.0"
+  }
+}

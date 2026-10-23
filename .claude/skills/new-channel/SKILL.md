@@ -29,7 +29,7 @@ Open with one line: "Let's set up your first channel. Seven quick questions — 
 Ask these in ONE message (use AskUserQuestion for the multiple-choice ones if available; free text for the rest):
 
 1. **Niche** — what will the channel post about? (offer 4 examples that work faceless: text-message stories, money mistakes explained, strange history in 30 seconds, workplace confessions)
-2. **Faceless or on camera?** Faceless (recommended, the default): nobody on camera — narrated stories, explainers and text-on-screen videos built from animated scenes and b-roll; cheapest and fastest. On camera: a fictional AI person talking or being interviewed (Higgsfield character clips; more credits). Series: an **interactive story** told in parts that viewers vote on in the comments (see "Series" below).
+2. **Faceless or on camera?** Faceless (recommended, the default): nobody on camera — narrated stories, explainers and text-on-screen videos built from animated scenes and b-roll; cheapest and fastest. On camera: a fictional AI person talking or being interviewed (Higgsfield character clips; more credits).
 3. **Name and narrator**: the channel's name and who's telling the stories, in one line (a point of view beats a fake expert — a niche that implies credentials the owner doesn't have, like doctor or financial adviser, is risky and gets flagged). On camera: the character's name, age and vibe.
 4. **How does it sound?** e.g. dry and deadpan / warm and conspiratorial / chaotic Gen-Z.
 5. **Look**: a colour or mood for the scenes (e.g. dark with a neon green accent). On camera: also where we see them (one main location).
@@ -62,9 +62,9 @@ Then skip to step 5 below (write ids into `settings.json`); `format` is `"facele
 
 If Higgsfield isn't connected yet, write the prompts into `channels/<slug>/prompts.md`, tell the owner, and continue — the agents will stop at their gates until the sheet exists.
 
-## Series (format "series") — replaces Steps 2-3
-1. Settings: `format: "series"`, a `story` block (title, premise, pov, tone, look, cast, locations, stakes, canon [], season, position, vote, cameo). Copy the shape from `docs/STORY-SERIES.md`.
-2. **Write the whole season as a branching map** in `channels/<slug>/story-map.json` (same schema as `docs/examples/story-map.min.json`): 20-35 nodes, 2-3 options each, two stakes that pull every path to an ending, 6-10 endings split between got_away and caught, a `pressure` per part and a `max_parts` cap. Run `node scripts/story-map-check.mjs channels/<slug>/story-map.json` and fix until it says MAP OK with no warnings; aim for a roughly even got-away/caught split and a 4-11 part range. Show the owner the readable map (`node scripts/build-story-map.mjs <slug>`, then publish `channels/<slug>/story-map.html`) before generating anything.
+## Story series (format "story") — replaces Steps 2-3
+1. Settings: `format: "story"`, a `story` block (title, premise, pov, tone, look, cast, locations, stakes, canon [], season, position, vote, cameo). Copy the shape from `docs/STORY-SERIES.md`.
+2. **Write the whole season as a branching map** in `channels/<slug>/story-map.json` (same schema as the docs example): 20-35 nodes, 2-3 options each, two stakes that pull every path to an ending, 6-10 endings split between got_away and caught, a `pressure` per part and a `max_parts` cap. Run `node scripts/story-map-check.mjs channels/<slug>/story-map.json` and fix until it says MAP OK with no warnings; aim for a roughly even got-away/caught split and a 4-11 part range. Show the owner the readable map (publish `tracker/story-map.html` with the map inlined, see the docs) before generating anything.
 3. Look: one character sheet per cast member and one still per location (charsheet-soul), all in `story.look`. Voice: one narrator.
 4. In Step 4 also write the map to the tracker as `story/map` (the full JSON) and create the empty `cameos` collection. Step 5 renders the Showrunner instead of the Planner automatically.
 

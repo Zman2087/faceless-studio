@@ -190,6 +190,11 @@ a{color:var(--stamp)}
     <div class="log" id="canon" style="margin-top:10px"></div>
   </section>
 
+  <section class="sec" aria-labelledby="pitH" id="pitchSec" hidden>
+    <div class="row" style="justify-content:space-between"><h2 id="pitH">Next series ideas</h2><p class="note">The Series Developer pitches new seasons and series. Approve one and it writes and checks the whole branching map; then pick it for the next season.</p></div>
+    <div class="log" id="pitchList"><div class="empty">No pitches yet. The developer runs weekly.</div></div>
+  </section>
+
   <section class="sec" aria-labelledby="camH" id="cameoSec" hidden>
     <div class="row" style="justify-content:space-between"><h2 id="camH">Cameo passes</h2><p class="note">Add each buyer's handle when a sale comes in. The Showrunner places them in upcoming parts, oldest first, never as a suspect or victim.</p></div>
     <div class="grid3" style="align-items:end">
@@ -243,10 +248,11 @@ const COLS=[
   {key:"ready",label:"Ready to post",match:["ready"]},
   {key:"posted",label:"Posted",match:["posted"]}
 ];
+const VOTE_SOURCES=[["comments_tiktok","TikTok comments"],["comments_instagram","Instagram comments"],["comments_youtube","YouTube comments"],["poll_instagram","Instagram story poll"],["poll_youtube","YouTube community poll"],["other","Other (DMs, site, live)"]];
 const STATUS_TEXT={awaiting_owner:"Needs your OK",planned:"Planned",scripted:"Awaiting audit",needs_rewrite:"Rewrite requested",approved:"Approved",producing:"Generating",produced:"Awaiting QA",failed:"Needs attention",ready:"Ready to post",posted:"Posted"};
 const STATUS_TONE={awaiting_owner:"bad",needs_rewrite:"warn",failed:"bad",ready:"good",posted:"good",approved:"good",producing:"warn"};
 let copyStore={};
-let db=null, canWrite=true, episodes=[], settings=null, runs=[], requests=[], cameos=[], openId=null;
+let db=null, canWrite=true, episodes=[], settings=null, runs=[], requests=[], cameos=[], pitches=[], openId=null;
 const $=id=>document.getElementById(id);
 const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const num=n=>Number(n||0).toLocaleString("en-AU");
@@ -384,7 +390,7 @@ function render(){
   }
 
   // Story series: stakes, canon, cameo queue
-  const story=settings?.story; const isStory=settings?.format==="series";
+  const story=settings?.story; const isStory=settings?.format==="story";
   $("storySec").hidden=!isStory; $("cameoSec").hidden=!isStory;
   if(isStory&&story){
     const sk=$("stakes");sk.textContent="";
@@ -394,9 +400,17 @@ function render(){
     const can=story.canon||[];
     if(!can.length)cn.innerHTML=`<div><b>Nothing decided yet</b><span>${esc(story.premise||"")}</span></div>`;
     for(const c of can){const d=document.createElement("div");d.innerHTML=`<b>Part ${esc(c.part)} · ${esc(c.title||"")}</b><span>${esc(c.happened||"")} <b style="color:var(--ink)">${esc(c.result||"")}</b></span>`;cn.append(d)}
+    const rv=story.reveal;
+    if(rv){const d=document.createElement("div");d.innerHTML=`<b>Route reveal · ${esc(rv.matched_votes)} votes matched the perfect run</b><span>${rv.turning_point?`Turning point: Part ${esc(rv.turning_point.part)}, "${esc(rv.turning_point.chose?.label)}" (${esc(rv.turning_point.chose?.pct??"?")}%). The perfect move was "${esc(rv.turning_point.best?.label)}".`:"The audience never lost ground."}</span>`;cn.append(d)}
     const cl=$("cameoList");
     if(cameos.length){cl.textContent="";const CS={queued:"Waiting for a part",scheduled:"Scheduled",featured:"Featured"};
       for(const c of [...cameos].sort((a,b)=>String(a.created_at).localeCompare(String(b.created_at)))){const ep=c.post_id?episodes.find(x=>x.id===c.post_id):null;const d=document.createElement("div");d.innerHTML=`<b>${esc(c.handle)}${c.tier==="business"?" · business":""}</b><span>${esc(CS[c.status]||c.status)}${ep?` · ${esc(ep.title||ep.id)}`:""}${c.placement?` · ${esc(c.placement)}`:""}</span>`;cl.append(d)}}
+  }
+  $("pitchSec").hidden=!isStory;
+  if(isStory&&pitches.length){const pl=$("pitchList");pl.textContent="";const PS={pitched:"Pitched",approved:"Approved: map being written",map_ready:"Map ready",passed:"Passed",next:"Next season"};
+    for(const p of [...pitches].sort((a,b)=>String(b.created_at).localeCompare(String(a.created_at)))){const d=document.createElement("div");
+      d.innerHTML=`<b>${esc(p.title)} · ${esc(PS[p.status]||p.status)}</b><span>${esc(p.logline||"")}${p.checker?` · ${esc(p.checker)}`:""}</span><span class="row" style="margin-top:6px">${p.status==="pitched"?`<button type="button" data-pa="approved" data-p="${esc(p.id)}">Approve</button><button type="button" data-pa="passed" data-p="${esc(p.id)}">Pass</button>`:""}${p.status==="map_ready"?`<button type="button" class="primary" data-pa="next" data-p="${esc(p.id)}">Use for next season</button>`:""}</span>`;pl.append(d)}
+    pl.querySelectorAll("[data-pa]").forEach(b=>b.onclick=async()=>{try{await db.doc("pitches/"+b.dataset.p).update({status:b.dataset.pa,decided_at:new Date().toISOString()});if(b.dataset.pa==="next")await db.doc("settings/channel").update({story:{...(settings?.story||{}),next_map:b.dataset.p}});toast("Saved")}catch{toast("Couldn't save. Try again.")}});
   }
   // Requests
   const rl=$("reqList");
@@ -504,9 +518,14 @@ function openDrawer(id,refresh){
         <label>Reels views<input id="vIg" inputmode="numeric" value="${esc(e.performance?.instagram_views??"")}"></label>
         <label>Shorts views<input id="vYt" inputmode="numeric" value="${esc(e.performance?.youtube_views??"")}"></label>
       </div>
+      ${e.choice?`<label>Link to the post (for the website's Files)<input id="vUrl" type="url" placeholder="https://www.instagram.com/reel/…" value="${esc(e.post_urls?.instagram||e.post_urls?.tiktok||"")}"></label>`:""}
       <div class="row">${e.status==="ready"?`<button type="button" class="primary" id="markPosted" ${canWrite?"":"disabled"}>Mark as posted</button>`:""}<button type="button" id="saveViews" ${canWrite?"":"disabled"}>Save views</button></div></div>`:""}
-    ${e.choice&&["ready","posted"].includes(e.status)?`<div class="sec kit"><h3 style="color:var(--ink)">The vote</h3><p class="note" style="color:var(--ink)">${esc(e.choice.text)} Count the A / B${(e.choice.options||[]).length>2?" / C":""} comments on each app and type the totals. The Showrunner closes the vote at ${esc(settings?.story?.vote?.closes_text||"its next run")}.</p>
-      ${e.vote?.closed_at?`<p><b>Closed:</b> ${esc(e.vote.winner)} won · ${(e.choice.options||[]).map(o=>`${esc(o.key)} ${esc(o.label)}: ${esc(e.vote.pct?.[o.key]??"–")}%`).join(" · ")}</p>`:`<div class="grid3">${(e.choice.options||[]).map(o=>`<label>${esc(o.key)} · ${esc(o.label)}<input data-vote="${esc(o.key)}" inputmode="numeric" value="${esc(e.vote?.counts?.[o.key]??"")}"></label>`).join("")}</div><div class="row"><button type="button" id="saveVotes" class="primary" ${canWrite?"":"disabled"}>Save vote counts</button></div>`}</div>`:""}
+    ${e.choice&&["ready","posted"].includes(e.status)?`<div class="sec kit"><h3 style="color:var(--ink)">The audience's verdict</h3><p class="note" style="color:var(--ink)">${esc(e.choice.text)} Type the A / B${(e.choice.options||[]).length>2?" / C":""} counts from each place people voted (leave the rest empty) and the gist of what they said. The Showrunner adds them up and writes the next part at ${esc(settings?.story?.vote?.closes_text||"its next run")}.</p>
+      ${e.vote?.closed_at?`<p><b>Closed:</b> ${esc(e.vote.winner)} won · ${(e.choice.options||[]).map(o=>`${esc(o.key)} ${esc(o.label)}: ${esc(e.vote.pct?.[o.key]??"–")}%`).join(" · ")} · ${esc(e.vote.total??"")} votes</p>${e.vote.feedback?`<p class="note" style="color:var(--ink)"><b>What they said:</b> ${esc(e.vote.feedback)}</p>`:""}`:`<div style="overflow-x:auto"><table><thead><tr><th>Where</th>${(e.choice.options||[]).map(o=>`<th class="num">${esc(o.key)} · ${esc(o.label)}</th>`).join("")}</tr></thead><tbody>${VOTE_SOURCES.map(([k,l])=>`<tr><td>${esc(l)}</td>${(e.choice.options||[]).map(o=>`<td class="num"><input data-src="${k}" data-opt="${esc(o.key)}" inputmode="numeric" aria-label="${esc(l+" "+o.key)}" style="width:7em;text-align:right" value="${esc(e.vote?.sources?.[k]?.[o.key]??"")}"></td>`).join("")}</tr>`).join("")}</tbody></table></div>
+      ${e.naming?`<label>Names people suggested for the ${esc(e.naming.target)} (one per line, "Name: count")<textarea id="voteNames" placeholder="Marcus: 312&#10;Danny: 140&#10;Steve: 61">${esc(Object.entries(e.vote?.names||{}).map(([k,v])=>k+": "+v).join("\n"))}</textarea></label>`:""}
+      <label>What people are saying (themes, write-in ideas, theories, standout comments)<textarea id="voteFeedback" placeholder="e.g. lots of 'call Tess!', people think Lena is lying, a few want him to fight Mercer">${esc(e.vote?.feedback||"")}</textarea></label>
+      <div class="row"><button type="button" id="saveVotes" class="primary" ${canWrite?"":"disabled"}>Save the verdict</button><span class="note" id="voteTotal"></span></div>`}</div>`:""}
+    ${e.story_poll?(copyStore["poll"]=e.story_poll.question+"\n"+(e.story_poll.options||[]).join("\n"),`<div class="cap"><header><b>Story poll (Instagram story · YouTube community)</b><button type="button" data-copy="poll">Copy</button></header><p>${esc(e.story_poll.question)}\n${(e.story_poll.options||[]).map(esc).join("\n")}</p></div>`):""}
     ${(e.cameos||[]).length?`<div class="sec"><h3>Cameos in this part</h3><p class="note" style="color:var(--ink)">${e.cameos.map(c=>esc(c.handle)+" · "+esc(c.placement||"")).join("<br>")}</p></div>`:""}
     ${["failed","needs_rewrite"].includes(e.status)?`<div class="row"><button type="button" id="retry" ${canWrite?"":"disabled"}>${e.status==="failed"?"Send back to production":"Send back to the writer"}</button></div>`:""}
     <div class="row"><button type="button" class="danger" id="shelve" ${canWrite?"":"disabled"}>Shelve this post</button></div>
@@ -516,11 +535,11 @@ function openDrawer(id,refresh){
   $("closeD").onclick=closeDrawer;
   d.querySelectorAll("[data-copy]").forEach(b=>b.onclick=async()=>{const t=copyStore[b.dataset.copy]||"";try{await navigator.clipboard.writeText(t);toast("Copied")}catch{const box=b.closest(".cap");const p=box?box.querySelector("p"):null;if(p){const r=document.createRange();r.selectNodeContents(p);const s=getSelection();s.removeAllRanges();s.addRange(r);toast("Selected: press copy")}else toast("Copy each part separately")}});
   const views=()=>({tiktok_views:Number($("vTik").value.replace(/\D/g,""))||0,instagram_views:Number($("vIg").value.replace(/\D/g,""))||0,youtube_views:Number($("vYt").value.replace(/\D/g,""))||0,updated_at:new Date().toISOString()});
-  if($("markPosted"))$("markPosted").onclick=()=>write(e.id,{status:"posted",posted_at:new Date().toISOString(),performance:views()},"Marked as posted");
-  if($("saveViews"))$("saveViews").onclick=()=>write(e.id,{performance:views()},"Views saved");
+  if($("markPosted"))$("markPosted").onclick=()=>write(e.id,{status:"posted",posted_at:new Date().toISOString(),performance:views(),...($("vUrl")&&$("vUrl").value.trim()?{post_urls:{...(e.post_urls||{}),[/tiktok/.test($("vUrl").value)?"tiktok":"instagram"]:$("vUrl").value.trim()}}:{})},"Marked as posted");
+  if($("saveViews"))$("saveViews").onclick=()=>write(e.id,{performance:views(),...($("vUrl")&&$("vUrl").value.trim()?{post_urls:{...(e.post_urls||{}),[/tiktok/.test($("vUrl").value)?"tiktok":"instagram"]:$("vUrl").value.trim()}}:{})},"Views saved");
   if($("ownerOk"))$("ownerOk").onclick=()=>write(e.id,{status:"approved",approved_at:new Date().toISOString(),approved_by:"owner"},"Approved: the producer picks it up next run");
   if($("ownerBack"))$("ownerBack").onclick=()=>{const n=$("ownerNote").value.trim();if(!n){toast("Add a note for the writer first");return}write(e.id,{status:"needs_rewrite",owner_note:n,rewrite_count:(Number(e.rewrite_count)||0)+1},"Sent back to the writer")};
-  if($("saveVotes"))$("saveVotes").onclick=()=>{const counts={};d.querySelectorAll("[data-vote]").forEach(i=>counts[i.dataset.vote]=Number(i.value.replace(/\D/g,""))||0);write(e.id,{vote:{...(e.vote||{}),counts,counted_at:new Date().toISOString()}},"Vote counts saved")};
+  if($("saveVotes"))$("saveVotes").onclick=()=>{const sources={},counts={};d.querySelectorAll("[data-src]").forEach(i=>{const v=Number(i.value.replace(/\D/g,""));if(!i.value.trim())return;(sources[i.dataset.src]=sources[i.dataset.src]||{})[i.dataset.opt]=v||0;counts[i.dataset.opt]=(counts[i.dataset.opt]||0)+(v||0)});write(e.id,{vote:{...(e.vote||{}),sources,counts,feedback:$("voteFeedback").value.trim(),...($("voteNames")?{names:Object.fromEntries($("voteNames").value.split("\n").map(l=>l.split(":")).filter(x=>x[0].trim()).map(([n,c])=>[n.trim(),Number(String(c||"").replace(/\D/g,""))||1]))}:{}),counted_at:new Date().toISOString()}},"Verdict saved: "+Object.entries(counts).map(([k,v])=>k+" "+v).join(", "))};
   if($("retry"))$("retry").onclick=()=>write(e.id,{status:e.status==="failed"?"approved":"planned",error:null},"Sent back");
   $("shelve").onclick=()=>{const b=$("shelve");if(b.dataset.armed){write(e.id,{status:"shelved"},"Post shelved");closeDrawer()}else{b.dataset.armed="1";b.textContent="Tap again to shelve"}};
 }
@@ -566,5 +585,6 @@ $("resumeBtn").onclick=()=>setPaused(false);
   db.collection("runs").onSnapshot(s=>{runs=s.docs.map(d=>({id:d.id,...d.data()}));render()});
   db.collection("requests").onSnapshot(s=>{requests=s.docs.map(d=>({id:d.id,...d.data()}));render()});
   db.collection("cameos").onSnapshot(s=>{cameos=s.docs.map(d=>({id:d.id,...d.data()}));render()});
+  db.collection("pitches").onSnapshot(s=>{pitches=s.docs.map(d=>({id:d.id,...d.data()}));render()});
 })();
 </script>

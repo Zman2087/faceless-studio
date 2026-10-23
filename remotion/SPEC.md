@@ -60,9 +60,10 @@ at 0 s (shot 0 + any overlay with `at: 0`) is drawn fully, with no fade-in: put 
 | `lowerthird` | `text`, `sub`, `color`, `y` | name/CTA tag bottom left |
 | `stamp` | `text` ≤ 7 chars, `color`, `y` | rotated rubber-stamp number |
 | `titlecard` | `text` (lines split with a pipe character; line 2 in the accent colour), `sub` (e.g. "Part 3"), `y` | the series' recurring thumbnail title — use it at `at: 0` |
-| `choice` | `text` (≤ 70 chars), `options[{key, label ≤ 40}]` (2-3), `sub` (e.g. "Comment A or B") | the end-of-part vote card; captions hide while it's up |
+| `choice` | `text` (≤ 70 chars), `options[{key, label ≤ 40}]` (2-3), `sub` (e.g. "Comment A or B") | the end-of-episode vote card; captions hide while it's up |
 | `cameo` | `text` (what the list is, in-world), `handles[]` (1-8, `@handle`) | paid cameo handles shown as part of the scene (a witness list, a contacts screen) |
-| `meter` | `text` (label), `from`, `value` (0-100), `color` | a stake carried across parts (SUSPICION 62% ▲42) |
+| `meter` | `text` (label), `from`, `value` (0-100), `color` | a stake carried across episodes (SUSPICION 62% ▲42) |
+| `routes` | `text` (headline), `sub` (legend), `lanes[{label, ending, type, steps[{part, key, label, pct, best, turning}]}]` (1-2 lanes, ≤ 12 steps) | the season's Route Reveal board: the audience's route next to the perfect run; made by `scripts/story-route-compare.mjs --spec` |
 
 ## Tools
 
@@ -76,5 +77,4 @@ at 0 s (shot 0 + any overlay with `at: 0`) is drawn fully, with no fade-in: put 
 
 `examples/explainer.json` (faceless 10 s block), `examples/talking-clip.json` (an AI clip with a
 hook headline, captions and a follow CTA), `examples/animated.json` (kinetic, chat, compare and
-transitions), `examples/story-episode.json` (an interactive series part: title card, suspicion meter,
-cameo list, A/B vote card) and `examples/beats.json` (a beat sheet for `tools/beats.mjs`). `npm test` renders them with stand-in media.
+transitions), `examples/story-scene.json` (a stick-figure story part: scene shots, speech bubbles, A/B/C choice card), `examples/route-reveal.json` (the season-end Route Reveal board) and `examples/beats.json` (a beat sheet for `tools/beats.mjs`). `npm test` renders them with stand-in media.

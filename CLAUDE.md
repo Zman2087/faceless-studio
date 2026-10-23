@@ -30,14 +30,20 @@ If setup hasn't been run (`remotion/node_modules` missing), run `./setup.sh --no
 | `tracker/tracker.html` | the studio page; publish as an Artifact with `{"db":{},"user":{}}` |
 | `channels/<slug>/settings.json` | the channel + rules; seeded into the tracker as `settings/channel` |
 | `remotion/` | the render engine — spec format in `remotion/SPEC.md`, CLI `node remotion/render.mjs` |
-| `scripts/` | `new-channel.mjs`, `render-agents.mjs`, `doctor.mjs`, `assets.mjs`, `story-map-check.mjs`, `build-story-map.mjs`, `package-skills.sh` |
-| `agents/templates/7-showrunner.md` | series only: closes votes, follows the story map, places cameos |
-| `tracker/story-map.html` | readable + playable story map page (`scripts/build-story-map.mjs`) |
+| `scripts/` | `new-channel.mjs`, `render-agents.mjs`, `doctor.mjs`, `assets.mjs`, `package-skills.sh` |
+| `agents/templates/_story.md` | story series rules (hidden mechanics, consequences first, naming, 90-150 s, character lines) |
+| `agents/templates/7-showrunner.md` | story series only: closes votes from every source, follows the hidden map, names, cameos, Route Reveal, site state |
+| `agents/templates/8-developer.md` | story series only: weekly research, side content, pitches, builds new season maps |
+| `remotion/src/scene/` | stick-figure scene engine (`type: "scene"`: sets, actors, poses, props, camera) |
+| `remotion/tools/` | `beats.mjs`, `voice-track.mjs` (multi-voice takes), `render-long.mjs` (90-150 s episodes in chunks), `edit.mjs` |
+| `scripts/story-map-check.mjs` · `story-route-compare.mjs` · `build-story-map.mjs` | check a branching map, compare the audience's route with the optimal one, build `tracker/story-map.html` |
+| `site/template/` · `scripts/build-site.mjs` · `scripts/site-state.mjs` | optional series website with Stripe Payment Links, and its live state.json |
+| `docs/diagrams/tools/render.mjs` | sketch `*.diagram.json` → `.excalidraw` + `.svg`. Diagrams are always Excalidraw, never ASCII |
 | `docs/diagrams/` | Excalidraw sources (`.excalidraw`) and their SVG exports used in the docs |
 
 ## Pipeline (tracker statuses)
 planned → scripted → (needs_rewrite ↺) → [awaiting_owner if approval_mode is "owner"] → approved →
-producing → produced → ready → posted. Series channels add a vote on each posted part (`vote.counts`, closed by the Showrunner) and a `cameos` collection. `shelved` and `failed` are side exits. The owner can pause all
+producing → produced → ready → posted. Story series add a vote on each posted part (`vote.sources`/`counts`, closed by the Showrunner), `cameos` and `pitches` collections. `shelved` and `failed` are side exits. The owner can pause all
 agents from the tracker.
 
 ## Rules

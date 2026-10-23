@@ -1,0 +1,127 @@
+{
+  "duration": 23,
+  "theme": {
+    "bg": "#0A0A0F",
+    "accent": "#FFD23F",
+    "danger": "#FF4D4D",
+    "good": "#3CCB7F"
+  },
+  "shots": [
+    {
+      "at": 0,
+      "type": "title",
+      "text": "The route you took",
+      "highlight": "you took"
+    }
+  ],
+  "overlays": [
+    {
+      "at": 0,
+      "end": 3,
+      "type": "titlecard",
+      "text": "You're the|only witness",
+      "sub": "Route reveal"
+    },
+    {
+      "at": 3,
+      "end": 23,
+      "type": "routes",
+      "text": "2 of 5 votes matched the perfect run.",
+      "sub": "Green: the best move from where you were. Red: the vote that cost you.",
+      "lanes": [
+        {
+          "label": "You chose",
+          "ending": "Paid to Forget",
+          "type": "got_away",
+          "steps": [
+            {
+              "part": 1,
+              "key": "A",
+              "label": "Run",
+              "pct": 58,
+              "best": false,
+              "turning": false
+            },
+            {
+              "part": 2,
+              "key": "A",
+              "label": "Follow the ute",
+              "pct": 64,
+              "best": true,
+              "turning": false
+            },
+            {
+              "part": 3,
+              "key": "A",
+              "label": "Film them and slip away",
+              "pct": 71,
+              "best": true,
+              "turning": false
+            },
+            {
+              "part": 4,
+              "key": "C",
+              "label": "Use it against Hale",
+              "pct": 52,
+              "best": false,
+              "turning": false
+            },
+            {
+              "part": 5,
+              "key": "A",
+              "label": "Take the cash and the ship",
+              "pct": 67,
+              "best": false,
+              "turning": true
+            }
+          ]
+        },
+        {
+          "label": "Perfect run",
+          "ending": "Cleared",
+          "type": "got_away",
+          "steps": [
+            {
+              "part": 1,
+              "key": "B",
+              "label": "Stay and call triple zero",
+              "best": true
+            },
+            {
+              "part": 2,
+              "key": "A",
+              "label": "Hand Pike the phone",
+              "best": true
+            },
+            {
+              "part": 3,
+              "key": "A",
+              "label": "Wear a wire to meet Hale",
+              "best": true
+            },
+            {
+              "part": 4,
+              "key": "A",
+              "label": "Keep Hale talking",
+              "best": true
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "at": 19,
+      "end": 23,
+      "type": "lowerthird",
+      "text": "Part 5: \"Take the cash and the ship\"",
+      "sub": "That vote cost you Cleared. Voted C? Say so below.",
+      "color": "danger",
+      "y": 150
+    }
+  ],
+  "captions": {
+    "enabled": true
+  },
+  "watermark": "@onlywitness",
+  "audio": "assets/stand-in-voice.mp3"
+}

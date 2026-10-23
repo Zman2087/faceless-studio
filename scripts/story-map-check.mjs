@@ -5,6 +5,7 @@
 // reachable, every path reaches an ending within --max parts (applying stakes, flags and thresholds
 // exactly as the Showrunner does), and reports which endings are reachable and how long paths run.
 import fs from "node:fs";
+import { makeSim } from "./lib/story-sim.mjs";
 
 const args = process.argv.slice(2);
 const file = args.find((a) => !a.startsWith("--"));
@@ -36,25 +37,9 @@ for (const e of map.endings) {
 }
 
 // ---------- simulation (same rules the Showrunner follows) ----------
+const sim = makeSim(map);
 const st = map.stakes;
-const clamp = (v) => Math.max(0, Math.min(100, v));
-const PRESSURE = map.pressure?.suspicion_per_part || 0;
-const MAXP = map.max_parts || Infinity;
-const R = { cleared: "E_CLEARED", cleared_min_proof: 60, cleared_fallback: null, caught_default: "C_FRAMED", caught_if_flag: {}, caught_if_node_prefix: {}, cleared_fail_caught_at_suspicion: 70, ...(map.rules || {}) };
-const caughtFor = (nodeId, flags) => {
-  for (const [f, e] of Object.entries(R.caught_if_flag)) if (flags.has(f)) return e;
-  for (const [pre, e] of Object.entries(R.caught_if_node_prefix)) if (nodeId.startsWith(pre)) return e;
-  return R.caught_default;
-};
-function step(nodeId, opt, s, part) {
-  const next = { suspicion: clamp(s.suspicion + PRESSURE + (opt.stakes?.suspicion || 0)), proof: clamp(s.proof + (opt.stakes?.proof || 0)), flags: new Set([...s.flags, ...(opt.flags || [])]) };
-  let to = opt.to;
-  if (next.suspicion >= st.suspicion.caught_at) to = caughtFor(nodeId, next.flags);
-  else if (next.proof >= st.proof.cleared_at && !endings[to]) to = R.cleared;
-  if (to === R.cleared && next.proof < R.cleared_min_proof) to = next.suspicion >= R.cleared_fail_caught_at_suspicion || !R.cleared_fallback ? caughtFor(nodeId, next.flags) : R.cleared_fallback; // the cleared ending needs real proof
-  if (!endings[to] && part + 1 >= MAXP) to = next.proof >= R.cleared_min_proof ? R.cleared : caughtFor(nodeId, next.flags); // the season has to end
-  return { to, s: next };
-}
+const step = sim.step;
 const results = {}; const lengths = []; let paths = 0, overlong = 0; const reached = new Set(["S1"]); const samples = {};
 function walk(id, s, depth, trail) {
   if (endings[id]) {
@@ -69,7 +54,7 @@ function walk(id, s, depth, trail) {
     walk(r.to, r.s, depth + 1, [...trail, `${id}:${o.key}`]);
   }
 }
-if (!errs.length) walk(map.start, { suspicion: st.suspicion.start, proof: st.proof.start, flags: new Set() }, 0, []);
+if (!errs.length) walk(map.start, sim.startState(), 0, []);
 for (const n of map.nodes) if (!reached.has(n.id)) warns.push(`${n.id} is never reached`);
 for (const e of map.endings) if (!results[e.id]) warns.push(`ending ${e.id} is never reached`);
 
@@ -81,5 +66,8 @@ console.log(`MAP OK  ${map.nodes.length} scenes · ${map.endings.length} endings
 console.log(`parts per playthrough: shortest ${lengths[0]}, median ${lengths[Math.floor(lengths.length / 2)]}, longest ${lengths[lengths.length - 1]}`);
 console.log(`got away ${Math.round((sum("got_away") / paths) * 100)}% · caught ${Math.round((sum("caught") / paths) * 100)}% of playthroughs`);
 for (const e of map.endings) console.log(`  ${e.type === "caught" ? "CAUGHT  " : "GOT AWAY"} ${e.id.padEnd(11)} ${String(results[e.id] || 0).padStart(6)}  e.g. ${(samples[e.id] || []).join(" > ")}`);
+const opt = sim.bestFrom(map.start, sim.startState(), 1);
+if (opt) console.log(`optimal route (${opt.parts} votes to ${opt.ending}): ${opt.path.map((p) => `${p.node}:${p.key}`).join(" > ")}`);
+for (const id of map.ending_rank || []) if (!endings[id]) errs.push(`ending_rank: unknown ending ${id}`);
 if (warns.length) console.log("WARN:\n- " + warns.join("\n- "));
 if (overlong) process.exit(1);

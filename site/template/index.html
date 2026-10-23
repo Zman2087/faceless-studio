@@ -1,0 +1,206 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>__TITLE__</title>
+<meta name="description" content="__DESCRIPTION__">
+<meta property="og:title" content="__TITLE__">
+<meta property="og:description" content="__DESCRIPTION__">
+<meta property="og:type" content="website">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;800&family=JetBrains+Mono:wght@500;700&display=swap">
+<style>
+/* An evidence-room site for an interactive series: tape, case files, a live vote. */
+:root{
+  --night:#07080c; --panel:#11131a; --panel2:#171a23; --ink:#f1f2f4; --muted:#9aa0ad; --rule:#262a36;
+  --accent:__ACCENT__; --accent-ink:#111; --danger:#ff4d4d; --good:#3ccb7f;
+  --display:"Anton","Impact","Arial Narrow",sans-serif; --body:"Inter",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+  color-scheme:dark;
+}
+*{box-sizing:border-box}
+html,body{margin:0;background:var(--night);color:var(--ink);font:16px/1.55 var(--body)}
+a{color:var(--accent)}
+:focus-visible{outline:3px solid var(--accent);outline-offset:3px}
+.wrap{max-width:1120px;margin:0 auto;padding-left:max(18px,env(safe-area-inset-left));padding-right:max(18px,env(safe-area-inset-right))}
+.tape{height:16px;background:repeating-linear-gradient(-45deg,var(--accent) 0 26px,#111 26px 34px)}
+nav{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;justify-content:space-between;padding-block:14px}
+nav .brand{font:400 26px/1 var(--display);letter-spacing:.04em;text-transform:uppercase;color:var(--ink);text-decoration:none}
+nav .links{display:flex;flex-wrap:wrap;gap:4px 16px;font:600 13px var(--mono);text-transform:uppercase;letter-spacing:.08em}
+nav .links a{color:var(--muted);text-decoration:none}nav .links a:hover{color:var(--ink)}
+.ticker{border-block:1px solid var(--rule);overflow:hidden;white-space:nowrap;font:600 13px var(--mono);letter-spacing:.06em;color:var(--muted)}
+.ticker span{display:inline-block;padding:10px 0;animation:tick 40s linear infinite}
+@keyframes tick{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+@media (prefers-reduced-motion:reduce){.ticker span{animation:none}}
+.hero{display:grid;grid-template-columns:minmax(0,1.25fr) minmax(0,1fr);gap:36px;align-items:center;padding-block:44px 30px}
+@media (max-width:860px){.hero{grid-template-columns:1fr}}
+.kicker{font:700 12px var(--mono);letter-spacing:.16em;text-transform:uppercase;color:var(--accent)}
+h1{font:400 clamp(52px,9vw,112px)/.9 var(--display);text-transform:uppercase;margin:10px 0 16px;letter-spacing:.01em;text-wrap:balance}
+h1 em{font-style:normal;color:var(--accent)}
+.lede{font-size:19px;color:#d6d8de;max-width:56ch;margin:0 0 22px}
+.btn{display:inline-flex;align-items:center;gap:10px;font:800 15px var(--body);text-transform:uppercase;letter-spacing:.04em;padding:15px 22px;border-radius:6px;text-decoration:none;border:2px solid var(--accent);color:var(--accent-ink);background:var(--accent)}
+.btn.ghost{background:transparent;color:var(--ink);border-color:var(--rule)}
+.row{display:flex;flex-wrap:wrap;gap:12px;align-items:center}
+.vote{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:22px;display:grid;gap:14px}
+.vote h2{font:400 30px/1 var(--display);text-transform:uppercase;margin:0}
+.opt{display:grid;gap:6px}
+.opt .l{display:flex;justify-content:space-between;gap:10px;font:700 15px var(--body)}
+.opt .l b{font-family:var(--mono)}
+.bar{height:14px;border-radius:7px;background:var(--panel2);overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);transition:width .6s}
+.opt:nth-child(3) .bar i{background:var(--danger)}.opt:nth-child(4) .bar i{background:#7fa8ff}
+.small{font-size:13px;color:var(--muted);margin:0}
+.upnext{display:flex;flex-wrap:wrap;gap:10px 24px;justify-content:space-between;align-items:center;background:var(--panel2);border:1px solid var(--rule);border-radius:10px;padding:16px 20px;margin-bottom:46px}
+.count{font:700 22px var(--mono);font-variant-numeric:tabular-nums}
+section{padding-block:34px;border-top:1px solid var(--rule)}
+h2.sec{font:400 clamp(34px,5vw,54px)/1 var(--display);text-transform:uppercase;margin:0 0 6px;letter-spacing:.01em}
+.sub{color:var(--muted);margin:0 0 22px;max-width:62ch}
+.ways{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,300px),1fr));gap:16px}
+.way{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:22px;display:grid;gap:10px;align-content:start}
+.way.main{border-color:var(--accent)}
+.way h3{font:400 28px/1 var(--display);text-transform:uppercase;margin:0}
+.price{font:700 30px var(--mono)}
+.way ul{margin:0;padding-left:18px;color:#d6d8de;font-size:15px}
+.files{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,220px),1fr));gap:14px}
+.file{background:var(--panel);border:1px solid var(--rule);border-radius:8px;padding:16px;display:grid;gap:8px;text-decoration:none;color:var(--ink)}
+.file:hover{border-color:var(--accent)}
+.file .no{font:700 12px var(--mono);color:var(--muted);letter-spacing:.1em}
+.file .t{font:400 24px/1.05 var(--display);text-transform:uppercase}
+.tag{display:inline-block;font:700 11px var(--mono);letter-spacing:.08em;text-transform:uppercase;padding:5px 8px;border-radius:4px;background:var(--panel2);color:var(--muted);justify-self:start}
+.tag.open{background:var(--accent);color:var(--accent-ink)}
+.board{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(100%,190px),1fr));gap:10px}
+.pin{background:#e9e2cf;color:#1a1a1a;padding:14px;border-radius:3px;font:700 15px var(--mono);transform:rotate(var(--r,0deg));box-shadow:0 8px 18px rgba(0,0,0,.4);word-break:break-all}
+.pin small{display:block;font:500 11px var(--mono);color:#6b6455;margin-top:4px;text-transform:uppercase;letter-spacing:.08em}
+.steps{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:14px;counter-reset:s}
+.step{background:var(--panel);border:1px solid var(--rule);border-radius:10px;padding:18px}
+.step b{display:block;font:400 22px var(--display);text-transform:uppercase;margin-bottom:4px}
+details{background:var(--panel);border:1px solid var(--rule);border-radius:8px;padding:14px 16px;margin-bottom:10px}
+summary{cursor:pointer;font-weight:700}
+form.list{display:flex;flex-wrap:wrap;gap:10px}
+form.list input{flex:1 1 240px;min-width:0;font:16px var(--body);padding:14px;border-radius:6px;border:1px solid var(--rule);background:var(--panel2);color:var(--ink)}
+footer{border-top:1px solid var(--rule);padding-block:28px 50px;color:var(--muted);font-size:14px;display:grid;gap:10px}
+footer .row a{color:var(--muted)}
+[hidden]{display:none!important}
+</style>
+</head>
+<body>
+<div class="tape" aria-hidden="true"></div>
+<div class="wrap">
+  <nav>
+    <a class="brand" href="#top" id="brand">__NAME__</a>
+    <div class="links"><a href="#vote">Vote</a><a href="#files">The Files</a><a href="#board">Case board</a><a href="#pass">Be in it</a><a href="#faq">FAQ</a></div>
+  </nav>
+</div>
+<div class="ticker" aria-hidden="true"><span id="ticker"></span></div>
+
+<main class="wrap" id="top">
+  <div class="hero">
+    <div>
+      <div class="kicker" id="kicker">An interactive series · you decide</div>
+      <h1 id="headline">__HEADLINE__</h1>
+      <p class="lede" id="lede">__LEDE__</p>
+      <div class="row">
+        <a class="btn" id="watchBtn" href="#" target="_blank" rel="noopener">Watch Part 1</a>
+        <a class="btn ghost" href="#pass">Put your @ in the story</a>
+      </div>
+    </div>
+    <div class="vote" id="vote" aria-live="polite">
+      <div class="kicker" id="voteKicker">Vote open</div>
+      <h2 id="voteQ">The vote opens with Part 1.</h2>
+      <div id="voteOpts" class="opt-list"></div>
+      <p class="small" id="voteHow">Comment your letter on the latest part. The most votes decide what happens next.</p>
+    </div>
+  </div>
+
+  <div class="upnext" id="upnext"><div><div class="kicker">Next part</div><div id="nextTitle">Coming soon</div></div><div class="count" id="countdown">--:--:--</div><a class="btn ghost" id="followBtn" href="#" target="_blank" rel="noopener">Follow</a></div>
+
+  <section id="files" aria-labelledby="filesH">
+    <h2 class="sec" id="filesH">The Files</h2>
+    <p class="sub">Every part so far and what you decided. New here? Start with Part 1.</p>
+    <div class="files" id="fileGrid"><div class="file"><div class="no">PART 1</div><div class="t">Coming soon</div></div></div>
+  </section>
+
+  <section id="pass" aria-labelledby="passH">
+    <h2 class="sec" id="passH">Be in the story</h2>
+    <p class="sub">Your handle appears inside a scene in an upcoming part: on a witness list, a phone screen, a crew roster. Never as a suspect or a victim.</p>
+    <div class="ways" id="ways"></div>
+  </section>
+
+  <section id="board" aria-labelledby="boardH">
+    <h2 class="sec" id="boardH">Case board</h2>
+    <p class="sub">Everyone who has put their name in the story.</p>
+    <div class="board" id="boardGrid"><div class="pin">Your @ here<small>Cameo pass</small></div></div>
+  </section>
+
+  <section aria-labelledby="howH">
+    <h2 class="sec" id="howH">How it works</h2>
+    <div class="steps">
+      <div class="step"><b>1 · Watch</b>A new part drops <span id="cadence">every weeknight</span>. Each one ends on a choice.</div>
+      <div class="step"><b>2 · Decide</b>Comment A, B or C, or vote in the story poll. Tell us what you think is really going on.</div>
+      <div class="step"><b>3 · Live with it</b>The next part opens with what your decision caused. Sometimes you'll name a character, too.</div>
+    </div>
+  </section>
+
+  <section id="list" aria-labelledby="listH" hidden>
+    <h2 class="sec" id="listH">The list</h2>
+    <p class="sub">One email when a new part drops. Nothing else.</p>
+    <form class="list" id="listForm" method="post" target="_blank"><input type="email" name="email" required placeholder="you@email.com" aria-label="Email address" id="listEmail"><button class="btn" type="submit">Join</button></form>
+  </section>
+
+  <section id="faq" aria-labelledby="faqH">
+    <h2 class="sec" id="faqH">FAQ</h2>
+    <div id="faqList"></div>
+  </section>
+</main>
+
+<footer class="wrap">
+  <div class="row"><a href="terms.html">Terms</a><a href="refunds.html">Refunds</a><a href="privacy.html">Privacy</a><span id="contact"></span></div>
+  <div id="disclaimer">A fictional story. Made with AI-assisted animation and voices.</div>
+</footer>
+
+<script>
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const get=u=>fetch(u,{cache:"no-store"}).then(r=>r.ok?r.json():null).catch(()=>null);
+(async()=>{
+  const [S,T]=await Promise.all([get("site.json"),get("state.json")]);
+  if(!S)return;
+  const st=T||{};
+  $("brand").textContent=S.name;$("kicker").textContent=S.kicker||"An interactive series · you decide";
+  $("headline").innerHTML=esc(S.headline).replace(/\*(.+?)\*/g,"<em>$1</em>");$("lede").textContent=S.lede;
+  const first=(st.parts||[])[0];if(first?.url){$("watchBtn").href=first.url}else if(S.profile_url){$("watchBtn").href=S.profile_url}
+  $("followBtn").href=S.profile_url||"#";$("cadence").textContent=S.cadence||"every weeknight";
+  // live vote
+  const v=st.vote;
+  if(v&&v.options){$("voteKicker").textContent=v.open?`Part ${v.part} · vote open`:`Part ${v.part} · vote closed`;$("voteQ").textContent=v.question;
+    const tot=v.options.reduce((a,o)=>a+(o.votes||0),0);
+    $("voteOpts").innerHTML=v.options.map(o=>{const pc=tot?Math.round((o.votes||0)/tot*100):0;return `<div class="opt"><div class="l"><span>${esc(o.key)} · ${esc(o.label)}</span><b>${tot?pc+"%":""}</b></div><div class="bar"><i style="width:${pc}%"></i></div></div>`}).join("");
+    $("voteHow").textContent=v.how||"Comment your letter on the latest part. The most votes decide what happens next.";
+    if(v.naming)$("voteHow").textContent+=" "+v.naming;
+  }
+  // next drop countdown
+  if(st.next){$("nextTitle").textContent=st.next.title||"Next part";const tgt=new Date(st.next.at);const tick=()=>{const ms=tgt-Date.now();if(isNaN(ms)){return}if(ms<=0){$("countdown").textContent="Out now";return}const h=Math.floor(ms/36e5),m=Math.floor(ms%36e5/6e4),s=Math.floor(ms%6e4/1e3);$("countdown").textContent=`${String(h).padStart(2,"0")}:${String(m).padStart(2,"0")}:${String(s).padStart(2,"0")}`};tick();setInterval(tick,1000)}
+  // ticker
+  const tk=[v?`PART ${v.part} VOTE: ${(v.options||[]).map(o=>o.key+" "+(o.label||"")).join(" / ")}`:"",st.next?`NEXT: ${st.next.title}`:"",(st.board||[]).length?`${st.board.length} NAMES ON THE CASE BOARD`:"",S.ticker_extra||""].filter(Boolean).join("   ·   ");
+  $("ticker").textContent=(tk+"   ·   ").repeat(6);
+  // files
+  if((st.parts||[]).length)$("fileGrid").innerHTML=st.parts.map(p=>`<a class="file" href="${esc(p.url||"#")}" target="_blank" rel="noopener"><div class="no">PART ${esc(p.part)}</div><div class="t">${esc(p.title)}</div>${p.result?`<span class="tag">${esc(p.result)}</span>`:`<span class="tag open">Vote open</span>`}</a>`).join("");
+  // ways in
+  const now=Date.now();const tier=(S.pass?.tiers||[]).find(t=>!t.until||new Date(t.until)>now)||{};
+  const ways=[];
+  if(S.pass)ways.push(`<div class="way main"><div class="kicker">Cameo pass</div><h3>Your @ in a scene</h3>${tier.price?`<div class="price">${esc(tier.price)}</div>`:""}${tier.until?`<p class="small">Price goes up ${esc(new Date(tier.until).toLocaleString(undefined,{weekday:"long",hour:"numeric",minute:"2-digit"}))}</p>`:""}<ul>${(S.pass.includes||[]).map(x=>`<li>${esc(x)}</li>`).join("")}</ul>${tier.link?`<a class="btn" href="${esc(tier.link)}" target="_blank" rel="noopener">Get the pass</a>`:`<span class="small">Opening soon.</span>`}</div>`);
+  if(S.business)ways.push(`<div class="way"><div class="kicker">Business cameo</div><h3>Your shop in the story</h3><div class="price">${esc(S.business.price||"")}</div><p class="small">${esc(S.business.blurb||"Your shopfront or sign appears in a scene. Apply first; pay only if accepted.")}</p>${S.business.apply_url?`<a class="btn ghost" href="${esc(S.business.apply_url)}" target="_blank" rel="noopener">Apply</a>`:S.contact_email?`<p class="small">Email <b>${esc(S.contact_email)}</b></p>`:""}</div>`);
+  if(S.partners)ways.push(`<div class="way"><div class="kicker">Partnerships</div><h3>Sponsor a part</h3><p class="small">${esc(S.partners.blurb||"Brand partnerships, clearly labelled.")}</p>${S.contact_email?`<p class="small">Email <b>${esc(S.contact_email)}</b></p>`:""}</div>`);
+  $("ways").innerHTML=ways.join("");
+  // case board
+  if((st.board||[]).length)$("boardGrid").innerHTML=st.board.map((b,i)=>`<div class="pin" style="--r:${(i%5-2)*0.8}deg">${esc(b.handle)}<small>${esc(b.where||"Cameo pass")}</small></div>`).join("");
+  // list
+  if(S.list_action){$("list").hidden=false;$("listForm").action=S.list_action}
+  // faq
+  $("faqList").innerHTML=(S.faq||[]).map(q=>`<details><summary>${esc(q.q)}</summary><p>${esc(q.a)}</p></details>`).join("");
+  if(S.contact_email)$("contact").textContent=S.contact_email;
+  if(S.disclaimer)$("disclaimer").textContent=S.disclaimer;
+})();
+</script>
+</body>
+</html>

@@ -8,14 +8,11 @@ import { ShotView, Headline, StampMark } from "./shots/Shots";
 const resolve = (src: string) => (/^(https?:|data:)/.test(src) ? src : staticFile(src));
 
 // Burned-in captions: groups words into short chunks, current word in the accent colour.
-// While a lowerthird (the CTA) is on screen the captions move up so the two never overlap;
-// while a choice (vote) card is up they hide: the card speaks for itself.
-const Captions: React.FC<{ words: Word[]; t: Theme; per: number; y: number; upper: boolean; ctas: Overlay[]; hide: Overlay[]; duration: number }> = ({ words, t, per, y: baseY, upper, ctas, hide, duration }) => {
+const Captions: React.FC<{ words: Word[]; t: Theme; per: number; y: number; upper: boolean; hide?: [number, number][] }> = ({ words, t, per, y, upper, hide = [] }) => {
   const f = useCurrentFrame();
   const { fps } = useVideoConfig();
   const now = f / fps;
-  if (hide.some((o) => now >= o.at && now < (o.end ?? duration))) return null;
-  const y = ctas.some((o) => now >= o.at && now < (o.end ?? duration)) ? Math.min(baseY, 1100) : baseY;
+  if (hide.some(([a, b]) => now >= a && now < b)) return null; // the vote card speaks for itself
   const clean = words.filter((w) => w.e > w.s && w.w.trim() && !/^\[.*\]$/.test(w.w.trim()));
   const chunks: Word[][] = [];
   let cur: Word[] = [];
@@ -122,6 +119,62 @@ const OverlayView: React.FC<{ o: Overlay; t: Theme }> = ({ o, t }) => {
       </div>
     );
   }
+  if (o.type === "routes") {
+    // Route reveal: the audience's route next to the perfect run, one row per part, revealed in order.
+    const lanes = o.lanes || [];
+    const rows = Math.max(0, ...lanes.map((l) => l.steps.length));
+    const per = Math.min(1.6, Math.max(0.6, ((o.end ?? 30) - o.at - 4) / Math.max(1, rows)));
+    const rowH = Math.min(132, 1150 / Math.max(1, rows));
+    return (
+      <AbsoluteFill style={{ background: `rgba(6,6,10,${0.97 * p})`, padding: "150px 44px 80px", flexDirection: "column", gap: 26 }}>
+        <div style={{ fontFamily: t.font, fontWeight: 900, fontSize: 64, color: t.text, textAlign: "center", lineHeight: 1.1 }}>{o.text}</div>
+        {o.sub && <div style={{ fontFamily: "monospace", fontSize: 24, color: t.muted, textAlign: "center", marginTop: -10 }}>{o.sub}</div>}
+        <div style={{ display: "grid", gridTemplateColumns: `repeat(${lanes.length}, 1fr)`, gap: 22 }}>
+          {lanes.map((l, li) => (
+            <div key={li} style={{ display: "flex", flexDirection: "column", gap: 12 }}>
+              <div style={{ fontFamily: "monospace", fontSize: 30, letterSpacing: 5, color: li === 0 ? t.text : t.good, textTransform: "uppercase", textAlign: "center" }}>{l.label}</div>
+              {Array.from({ length: rows }).map((_, ri) => {
+                const x = l.steps[ri];
+                const q = spring({ frame: f - (0.4 + ri * per + li * 0.15) * fps, fps, config: { damping: 15 } });
+                if (!x) return <div key={ri} style={{ height: rowH }} />;
+                const c = x.turning ? t.danger : x.best ? t.good : t.muted;
+                return (
+                  <div key={ri} style={{ height: rowH, display: "flex", alignItems: "center", gap: 14, background: "rgba(255,255,255,.06)", border: `3px solid ${c}`, borderRadius: 16, padding: "0 16px", opacity: q, transform: `translateY(${(1 - q) * 24}px)` }}>
+                    <div style={{ fontFamily: "monospace", fontSize: 24, color: t.muted, minWidth: 42 }}>P{x.part}</div>
+                    <div style={{ minWidth: 58, height: 58, borderRadius: 12, background: c, color: onAccent(c), fontFamily: t.font, fontWeight: 900, fontSize: 38, display: "flex", alignItems: "center", justifyContent: "center" }}>{x.key}</div>
+                    <div style={{ fontFamily: t.font, fontWeight: 700, fontSize: Math.min(36, rowH * 0.3), color: t.text, lineHeight: 1.15, flex: 1 }}>
+                      {x.label}{x.pct != null ? <span style={{ color: t.muted, fontWeight: 600 }}> · {x.pct}%</span> : null}
+                    </div>
+                    {x.turning ? <div style={{ fontFamily: t.font, fontWeight: 900, fontSize: 40, color: t.danger }}>✕</div> : null}
+                  </div>
+                );
+              })}
+              {(() => {
+                const q = spring({ frame: f - (0.6 + rows * per + li * 0.3) * fps, fps, config: { damping: 11 } });
+                const c = l.type === "caught" ? t.danger : t.good;
+                return <div style={{ marginTop: 6, background: c, color: onAccent(c), fontFamily: t.font, fontWeight: 900, fontSize: 40, textAlign: "center", padding: "14px 10px", borderRadius: 16, textTransform: "uppercase", opacity: q, transform: `scale(${0.8 + 0.2 * q})` }}>{l.ending}</div>;
+              })()}
+            </div>
+          ))}
+        </div>
+      </AbsoluteFill>
+    );
+  }
+  if (o.type === "bubble") {
+    // A character speaking in their own voice: a comic speech balloon with the speaker's name.
+    const pop = instant ? 1 : spring({ frame: f, fps, config: { damping: 9, mass: 0.5 } });
+    const x = o.x ?? 540, y = o.y ?? 420, shout = /!/.test(o.text) && o.text === o.text.toUpperCase();
+    return (
+      <div style={{ position: "absolute", left: Math.max(40, Math.min(x - 300, 1080 - 640)), top: y, width: 600, transform: `scale(${0.6 + 0.4 * pop}) rotate(${shout ? -3 : 0}deg)`, transformOrigin: "50% 100%", opacity: pop }}>
+        {o.sub && <div style={{ fontFamily: "monospace", fontSize: 26, letterSpacing: 4, color: tone(t, o.color), textTransform: "uppercase", marginBottom: 8, marginLeft: 18 }}>{o.sub}</div>}
+        <div style={{ position: "relative", background: "#fff", color: "#111", border: "6px solid #111", borderRadius: shout ? 12 : 44, padding: "24px 30px", fontFamily: t.font, fontWeight: 900, fontSize: shout ? 64 : 52, lineHeight: 1.1, textAlign: "center", boxShadow: "8px 8px 0 rgba(0,0,0,.5)" }}>
+          {o.text}
+          <div style={{ position: "absolute", left: (o.tail ?? 0.5) * 100 + "%", bottom: -46, width: 0, height: 0, borderLeft: "26px solid transparent", borderRight: "26px solid transparent", borderTop: "46px solid #111", transform: "translateX(-50%)" }} />
+          <div style={{ position: "absolute", left: (o.tail ?? 0.5) * 100 + "%", bottom: -34, width: 0, height: 0, borderLeft: "18px solid transparent", borderRight: "18px solid transparent", borderTop: "34px solid #fff", transform: "translateX(-50%)" }} />
+        </div>
+      </div>
+    );
+  }
   // textover: the TikTok-style text box used on silent b-roll
   return (
     <div style={{ position: "absolute", left: 70, right: 70, top: o.y ?? 300, display: "flex", justifyContent: "center", opacity: p }}>
@@ -139,7 +192,8 @@ export const Video: React.FC<Spec> = (spec) => {
   t.font = `"${t.font}", Montserrat, sans-serif`;
   const shots = [...(spec.shots || [])].sort((a, b) => a.at - b.at);
   const total = Math.round(spec.duration * fps);
-  const cap = { enabled: true, words_per_chunk: 3, y: 1280, case: "sentence", ...(spec.captions || {}) };
+  const sceneLed = (spec.shots || []).some((x) => x.type === "scene"); // drawn scenes: captions sit below the ground line, clear of the cast
+  const cap = { enabled: true, words_per_chunk: 3, y: sceneLed ? 1660 : 1280, case: "sentence", ...(spec.captions || {}) };
   return (
     <AbsoluteFill style={{ background: t.bg }}>
       {shots.map((s, i) => {
@@ -148,7 +202,7 @@ export const Video: React.FC<Spec> = (spec) => {
         if (to <= from) return null;
         return (
           <Sequence key={i} from={from} durationInFrames={to - from} name={`${i + 1}. ${s.type}`}>
-            <Enter kind={s.transition ?? "fade"} first={i === 0}><ShotView s={s} t={t} base={s.at} /></Enter>
+            <Enter kind={s.transition ?? "fade"} first={i === 0}><ShotView s={s} t={t} base={s.at} cast={spec.cast} /></Enter>
           </Sequence>
         );
       })}
@@ -157,11 +211,13 @@ export const Video: React.FC<Spec> = (spec) => {
         const to = Math.round((o.end ?? spec.duration) * fps);
         return to > from ? <Sequence key={"o" + i} from={from} durationInFrames={to - from} name={`overlay ${o.type}`}><OverlayView o={o} t={t} /></Sequence> : null;
       })}
-      {cap.enabled && spec.words && spec.words.length > 0 && <Captions words={spec.words} t={t} per={cap.words_per_chunk!} y={cap.y!} upper={cap.case === "upper"} ctas={(spec.overlays || []).filter((o) => o.type === "lowerthird")} hide={(spec.overlays || []).filter((o) => o.type === "choice")} duration={spec.duration} />}
+      {cap.enabled && spec.words && spec.words.length > 0 && <Captions words={spec.words} t={t} per={cap.words_per_chunk!} y={cap.y!} upper={cap.case === "upper"}
+        hide={(spec.overlays || []).filter((o) => o.type === "choice").map((o) => [o.at, o.end ?? spec.duration] as [number, number])} />}
       {spec.watermark && <div style={{ position: "absolute", right: 40, top: 60, fontFamily: t.font, fontWeight: 700, fontSize: 30, color: "rgba(255,255,255,.7)" }}>{spec.watermark}</div>}
       {spec.ai_label !== false && <div style={{ position: "absolute", left: 40, top: 60, fontFamily: "monospace", fontSize: 22, color: "rgba(255,255,255,.55)" }}>AI-generated</div>}
       {spec.audio && <Audio src={resolve(spec.audio)} volume={spec.audio_volume ?? 1} />}
       {spec.music && <Audio src={resolve(spec.music)} volume={spec.music_volume ?? 0.12} loop />}
+      {(spec.sounds || []).map((x, i) => <Sequence key={"snd" + i} from={Math.round(x.at * fps)} name={`sound ${i + 1}`}><Audio src={resolve(x.src)} volume={x.volume ?? 1} /></Sequence>)}
     </AbsoluteFill>
   );
 };
