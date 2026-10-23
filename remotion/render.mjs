@@ -4,6 +4,7 @@
 //   node render.mjs spec.json out.mp4
 //   node render.mjs spec.json out.mp4 --preview out.jpg --at 0.2,3,6,9
 //   node render.mjs spec.json - --preview check.jpg --preview-only
+//   node render.mjs spec.json --still cover.png --at 0.5      one full-size frame (thumbnails)
 //   node render.mjs spec.json --validate
 //
 // Local files in the spec (audio, src, bg, music) are copied into public/_job/ automatically,
@@ -21,7 +22,7 @@ const HERE = path.dirname(fileURLToPath(import.meta.url));
 const args = process.argv.slice(2);
 const flag = (n) => { const i = args.indexOf(n); return i >= 0 ? args[i + 1] : undefined; };
 const has = (n) => args.includes(n);
-const VALUE_FLAGS = ["--preview", "--at", "--words", "--browser", "--concurrency"];
+const VALUE_FLAGS = ["--still", "--preview", "--at", "--words", "--browser", "--concurrency"];
 const [specPath, outPath] = args.filter((a, i) => !a.startsWith("--") && !VALUE_FLAGS.includes(args[i - 1]));
 
 if (!specPath) { console.error("usage: node render.mjs spec.json out.mp4 [--preview strip.jpg --at 0.2,3,6] [--words words.json] [--validate]"); process.exit(2); }
@@ -50,6 +51,9 @@ function validate(s) {
     if (hl && hl[1] && !(hl[0] || "").includes(hl[1])) errs.push(`${n}.highlight "${hl[1]}" is not an exact substring of its headline`);
     if (sh.stamp && String(sh.stamp.text).length > 7) errs.push(`${n}.stamp.text must be 7 characters or fewer`);
     if (sh.type === "media" && !sh.src) errs.push(`${n}.src is required for media shots`);
+    const moves = ["push", "pull", "pan_left", "pan_right", "rise", "fall", "still"];
+    if (sh.type === "media" && sh.move && !moves.includes(sh.move)) errs.push(`${n}.move "${sh.move}" is not one of ${moves.join(", ")}`);
+    if (sh.focus && (typeof sh.focus.x !== "number" || typeof sh.focus.y !== "number")) errs.push(`${n}.focus needs x and y between 0 and 1`);
     if (sh.type === "scene") {
       if (!SETS.includes(sh.set)) errs.push(`${n}.set "${sh.set}" is not one of ${SETS.join(", ")}`);
       (sh.actors || []).forEach((a, k) => {
@@ -67,6 +71,8 @@ function validate(s) {
   });
   (s.overlays || []).forEach((o, i) => {
     if (o.end != null && o.end <= o.at) errs.push(`overlays[${i}].end must be after .at`);
+    if (o.style && o.style !== "poster") errs.push(`overlays[${i}].style must be "poster" or left out`);
+    if (o.type === "titlecard" && o.style === "poster" && o.number && String(o.number).length > 3) errs.push(`overlays[${i}].number is the part number (3 characters or fewer)`);
     if (o.highlight && !(o.text || "").includes(o.highlight)) errs.push(`overlays[${i}].highlight is not a substring of its text`);
     if (o.type === "choice") {
       const ops = o.options || [];
@@ -102,6 +108,7 @@ const stage = (v) => {
 };
 spec.audio = stage(spec.audio);
 spec.music = stage(spec.music);
+spec.ambience = stage(spec.ambience);
 for (const x of spec.sounds || []) x.src = stage(x.src);
 for (const sh of spec.shots) { if (sh.src) sh.src = stage(sh.src); if (sh.bg) sh.bg = stage(sh.bg); }
 
@@ -127,6 +134,13 @@ if (outPath && outPath !== "-" && !has("--preview-only")) {
   console.log(`VIDEO ${outPath} ${composition.width}x${composition.height} ${(composition.durationInFrames / composition.fps).toFixed(1)}s`);
 }
 
+const still = flag("--still");
+if (still) {
+  fs.mkdirSync(path.dirname(path.resolve(still)), { recursive: true });
+  const at = Number(flag("--at") || 0.5);
+  await renderStill({ composition, serveUrl, output: path.resolve(still), frame: Math.min(composition.durationInFrames - 1, Math.round(at * composition.fps)), inputProps: spec, browserExecutable, chromeMode, imageFormat: still.endsWith(".png") ? "png" : "jpeg", jpegQuality: 92 });
+  console.log(`STILL ${still} ${composition.width}x${composition.height} at ${at} s`);
+}
 const preview = flag("--preview");
 if (preview) {
   const times = (flag("--at") || "0.2,3,6,9").split(",").map(Number).filter((x) => x < spec.duration);

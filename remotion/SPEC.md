@@ -23,7 +23,7 @@ Local paths in a spec are relative to the spec file. URLs (https) work too.
 | `music` / `music_volume` | path, 0-1 | optional bed (default 0.12) |
 | `words` | `[{w,s,e}]` | per-word timings → burned-in captions. Make it with `tools/words-from-transcript.mjs` from an ElevenLabs Scribe or Whisper transcript. |
 | `captions` | object | `enabled` (true), `words_per_chunk` (3), `y` (1280; 1660 when the spec has `scene` shots, below the ground line), `case` (`sentence`/`upper`) |
-| `sounds` | `[{src, at, volume}]` | sound effects or extra voice takes placed by time (`at` in seconds, `volume` 0-1, default 1): sirens, footsteps, a door |
+| `sounds` | `[{src, at, volume, bed}]` | sound effects or extra voice takes placed by time (`at` in seconds, `volume` 0-1, default 1): footsteps, a door, a hit. `bed: true` puts a background sound (sirens, crowd, wind) into the ducked music/ambience bed so it always sits under the narrator |
 | `cast` | `{id: {color, outfit, name}}` | the series cast for `scene` shots: each character's accent colour and outfit (see Scene shots), so every shot draws them the same |
 | `shots` | array | the picture, in time order; `shots[0].at` must be `0` |
 | `overlays` | array | text on top of whatever shot is showing, each with `at` and optional `end` |
@@ -66,7 +66,7 @@ camera, all drawn in code (zero credits). The canvas is 1080 × 1920 with the gr
 | `camera` | `zoom: [from, to]` (default 1.04 → 1.09, a slow push), `x: [from, to]` and `y: [from, to]` (the point the camera centres on; default 540, 1190), `ease`: `inout` (default), `in`, `out`, `linear`. The move runs over the whole shot |
 | `actors` | the cast in this shot (below) |
 | `props` | objects in the set (below) |
-| `fx` | any of `rain`, `fog`, `sirens`, `flicker`, `heartbeat`, `flash`, `letterbox`, `spotlight`, `dark`, `shake` |
+| `fx` | any of `rain`, `fog`, `sirens`, `siren_rise` (a red-blue wash that builds over 6 s from its `fx_at`; scale it with the shot's `siren_level`, 0-1), `flicker`, `heartbeat`, `flash`, `letterbox`, `spotlight`, `dark`, `shake`, `streaks` (motion lines behind anyone moving; runners always get them) |
 | `fx_at` | `{fx name: seconds}`: when an effect starts (default the start of the shot); `flash` fires once at that time |
 | `spot` | index of the actor the `spotlight` follows (default 0) |
 | `relative` | `true`: every time inside the shot (`then[].at`, `move.at`/`dur`, `enter_at`, `exit_at`, prop `at`, `fx_at`) is a fraction 0-1 of the shot's length, so it survives retiming to the real voice. The writer always uses this |
@@ -80,20 +80,29 @@ camera, all drawn in code (zero credits). The canvas is 1080 × 1920 with the gr
 | `x` | required, 0-1080 |
 | `cast` | an id from the spec's `cast` (the checker rejects unknown ids); or give `color` / `outfit` directly |
 | `y`, `scale`, `facing` | feet position (default 1540), size (1), `right` (default) or `left` |
-| `pose` | `stand` (default), `walk`, `run`, `crouch`, `kneel`, `point`, `phone`, `hold`, `handsup`, `sit`, `look_down`, `reach`, `shrug`, `lean`, `slumped`, `slumped_reach` |
+| `pose` | `stand` (default), `walk`, `run`, `crouch`, `kneel`, `point`, `phone`, `hold`, `handsup`, `sit`, `look_down`, `reach`, `shrug`, `lean`, `slumped`, `slumped_reach`, `kneel_reach` (kneeling, reaching forward), `kneel_hold` (kneeling, looking at what's in the hand), `pickup` (reaching to the ground), `frozen` (standing, both hands out a little: holding two things), `hand_mouth`, `look_up` |
 | `expression` | `neutral` (default), `scared`, `angry`, `calm`, `shock`, `sad`, `smirk` |
 | `item` | in the lead hand: `phone`, `knife`, `bag`, `envelope`, `badge`, `torch`, `mug`, `suitcase`, `none` |
-| `then` | `[{at, pose, expression?, item?, facing?}]`: changes during the shot, eased in |
+| `item2` | in the other hand (same list), e.g. a phone in one hand and a knife in the other |
+| `then` | `[{at, pose, expression?, item?, item2?, facing?}]`: changes during the shot, eased in |
 | `move` | `{to, at, dur, gait}`: walk (`gait: "walk"`, default) or run (`"run"`) from `x` to `to`, starting at `at` (0) for `dur` (2 s, or 0.5 when relative); the figure faces the way it moves |
 | `enter_at`, `exit_at` | fade in at / disappear at |
-| `outfit` | costume accents, merged over the cast entry: `hood`, `cap`, `coat`, `tie`, `scrubs`, `glasses`, `gloves` (booleans), `hair` (`short`, `bob`, `bun`, `long`, `silver`, `none`) |
+| `outfit` | costume accents, merged over the cast entry: `hood`, `cap`, `coat`, `tie`, `scrubs`, `glasses`, `gloves`, `lanyard` (booleans), `hair` (`short`, `bob`, `bun`, `long`, `silver`, `none`), `headphones` (`neck` or `on`), `pants` and `shoes` (colours: jeans and sneakers). Keep a character's look in the spec's `cast` so it's identical in every shot; override per shot only for real changes (headphones on, then round the neck) |
 | `label` | a small name tag above the head |
 | `glow` | a soft light on the figure |
 
 **Props**: `type` (`ute`, `car`, `police`, `truck`, `boat`, `bin`, `drain`, `door`, `sign`, `screen`,
-`phone`, `tape`, `chair`, `knife`, `bag`), `x`, `y` (default on the ground; `screen`/`phone` are
+`phone`, `tape`, `chair`, `knife`, `bag`, `window`), `x`, `y` (default on the ground; `screen`/`phone` are
 centred on `y`, default 600), `scale`, `flip`, `at` (appears at), `text` (a door number, a sign, a
-number plate, the tape's words; on `screen` and `phone` the text types itself in).
+number plate, the tape's words; on `screen` and `phone` the text types itself in). `window` is a
+window that stays dark until `at`, then snaps on with a silhouette behind the glass: `w`, `h`, `skew`
+(degrees, to sit on a wall in perspective; the lane's right-hand window is `x` 875, `y` 712, `w` 170,
+`h` 236, `skew` -25), `figure` (`bun`, `short`, `none`), `gesture` (`hand_mouth`, `point`, `still`).
+
+Short-form rules for story parts: the hook frame is the first frame (no fade from black); a new
+framing every 2-3 s (a new shot per beat, or a punch-in via `camera.zoom`); keep faces above y 1500
+on screen so captions (y 1660 in scene-led specs) never cover them; end on a framing that matches the
+first shot so the video loops.
 
 ```json
 { "type": "scene", "at": 0, "set": "lane", "time": "night", "relative": true,
@@ -140,4 +149,21 @@ transitions), `examples/story-scene.json` (a stick-figure story part: scene shot
 
 ## Illustrated story parts
 
-(see the illustrated look section, added separately)
+Story series can use AI stills instead of drawn scenes (`settings.story.look: "illustrated"`); the
+motion and all text stay in Remotion, so a part costs only its stills.
+
+| field | where | notes |
+|---|---|---|
+| `move` | `media` shot | camera move over a still: `push` (default), `pull`, `pan_left`, `pan_right`, `rise`, `fall`, `still` |
+| `focus` | `media` shot | `{x, y}` 0-1: the point the move heads for (default the centre) |
+| `flicker`, `rain` | `media` shot | a faint light flicker; light rain streaks over the still |
+| `style: "poster"` | `titlecard` overlay | the series title look: `kicker` (small letter-spaced line, e.g. the season title), `number` (the part number, huge, accent colour), `text` (the part title), `sub`, `y`, `size` (0.6 on a 1280×720 thumbnail), `align` (`left`/`right`) |
+| `style: "poster"` | `choice` overlay | the matching vote card: "YOU DECIDE", the question, A/B/C tiles, the footer `sub` |
+| `grain` | top level | subtle film grain over the whole picture (also good on stick-figure parts) |
+| `ambience`, `ambience_volume` | top level | a rain or city loop under everything (default volume 0.08) |
+| `duck` | top level | music and ambience dip to this share of their volume while anyone speaks (default 0.6) |
+
+Both looks use the same sound bed: free ffmpeg-made rain/city ambience and a low drone (see the
+producer agent), music about 26 dB and ambience about 28 dB under the voice, and timed `sounds` for
+stings, whooshes, footsteps and sirens. The poster `titlecard` and `choice` styles work on stick-figure
+parts too.

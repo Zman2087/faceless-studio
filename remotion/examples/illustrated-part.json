@@ -1,0 +1,268 @@
+{
+  "duration": 21,
+  "fps": 30,
+  "theme": {
+    "bg": "#07070B",
+    "accent": "#FFD23F",
+    "danger": "#FF4D4D",
+    "font": "Montserrat"
+  },
+  "audio": "assets/stand-in-voice.mp3",
+  "music": "assets/stand-in-music.mp3",
+  "music_volume": 0.12,
+  "ambience": "assets/stand-in-ambience.mp3",
+  "ambience_volume": 0.08,
+  "duck": 0.55,
+  "grain": true,
+  "words": [
+    {
+      "w": "Eleven",
+      "s": 0.3,
+      "e": 0.69
+    },
+    {
+      "w": "forty.",
+      "s": 0.75,
+      "e": 1.14
+    },
+    {
+      "w": "Kellerman",
+      "s": 1.2,
+      "e": 1.7
+    },
+    {
+      "w": "Lane.",
+      "s": 1.75,
+      "e": 2.11
+    },
+    {
+      "w": "Rain.",
+      "s": 2.4,
+      "e": 2.75
+    },
+    {
+      "w": "One",
+      "s": 2.81,
+      "e": 3.1
+    },
+    {
+      "w": "streetlight.",
+      "s": 3.16,
+      "e": 3.76
+    },
+    {
+      "w": "And",
+      "s": 4.3,
+      "e": 4.58
+    },
+    {
+      "w": "a",
+      "s": 4.64,
+      "e": 4.86
+    },
+    {
+      "w": "man",
+      "s": 4.92,
+      "e": 5.21
+    },
+    {
+      "w": "on",
+      "s": 5.26,
+      "e": 5.51
+    },
+    {
+      "w": "the",
+      "s": 5.57,
+      "e": 5.86
+    },
+    {
+      "w": "ground.",
+      "s": 5.92,
+      "e": 6.34
+    },
+    {
+      "w": "He",
+      "s": 6.7,
+      "e": 6.95
+    },
+    {
+      "w": "pushes",
+      "s": 7.01,
+      "e": 7.4
+    },
+    {
+      "w": "his",
+      "s": 7.46,
+      "e": 7.75
+    },
+    {
+      "w": "phone",
+      "s": 7.8,
+      "e": 8.16
+    },
+    {
+      "w": "into",
+      "s": 8.22,
+      "e": 8.54
+    },
+    {
+      "w": "your",
+      "s": 8.6,
+      "e": 8.92
+    },
+    {
+      "w": "hand.",
+      "s": 8.98,
+      "e": 9.34
+    },
+    {
+      "w": "Don't",
+      "s": 9.2,
+      "e": 9.55
+    },
+    {
+      "w": "let",
+      "s": 9.61,
+      "e": 9.9
+    },
+    {
+      "w": "Hale...",
+      "s": 9.96,
+      "e": 10.38
+    },
+    {
+      "w": "Then",
+      "s": 11.6,
+      "e": 11.92
+    },
+    {
+      "w": "a",
+      "s": 11.98,
+      "e": 12.2
+    },
+    {
+      "w": "curtain",
+      "s": 12.26,
+      "e": 12.68
+    },
+    {
+      "w": "moves.",
+      "s": 12.74,
+      "e": 13.13
+    },
+    {
+      "w": "Someone",
+      "s": 13.4,
+      "e": 13.83
+    },
+    {
+      "w": "saw",
+      "s": 13.88,
+      "e": 14.17
+    },
+    {
+      "w": "you.",
+      "s": 14.23,
+      "e": 14.55
+    },
+    {
+      "w": "Sirens.",
+      "s": 15.0,
+      "e": 15.43
+    },
+    {
+      "w": "Ninety",
+      "s": 15.48,
+      "e": 15.88
+    },
+    {
+      "w": "seconds.",
+      "s": 15.93,
+      "e": 16.39
+    }
+  ],
+  "captions": {
+    "y": 1340,
+    "words_per_chunk": 3
+  },
+  "shots": [
+    {
+      "at": 0,
+      "type": "media",
+      "src": "illustrated/keyart.jpg",
+      "move": "push",
+      "focus": {
+        "x": 0.25,
+        "y": 0.62
+      },
+      "flicker": true,
+      "rain": true
+    },
+    {
+      "at": 6.5,
+      "type": "media",
+      "src": "illustrated/phone.jpg",
+      "move": "push",
+      "focus": {
+        "x": 0.45,
+        "y": 0.68
+      },
+      "transition": "fade"
+    },
+    {
+      "at": 11.4,
+      "type": "media",
+      "src": "illustrated/window.jpg",
+      "move": "rise",
+      "rain": true,
+      "transition": "fade"
+    },
+    {
+      "at": 15.6,
+      "type": "media",
+      "src": "illustrated/keyart.jpg",
+      "move": "pull",
+      "focus": {
+        "x": 0.5,
+        "y": 0.55
+      },
+      "flicker": true,
+      "rain": true,
+      "transition": "fade"
+    }
+  ],
+  "overlays": [
+    {
+      "at": 0,
+      "end": 5.6,
+      "type": "titlecard",
+      "style": "poster",
+      "kicker": "The Only Witness",
+      "number": "1",
+      "text": "Wrong Place",
+      "sub": "Majority rules"
+    },
+    {
+      "at": 16.4,
+      "type": "choice",
+      "style": "poster",
+      "text": "Sirens in ninety seconds. What do you do?",
+      "options": [
+        {
+          "key": "A",
+          "label": "Run"
+        },
+        {
+          "key": "B",
+          "label": "Hide the knife"
+        },
+        {
+          "key": "C",
+          "label": "Stay and call it in"
+        }
+      ],
+      "sub": "Comment A, B or C"
+    }
+  ],
+  "watermark": "@majorityrules.stories"
+}

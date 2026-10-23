@@ -2,9 +2,11 @@
 // costume accents, so a whole cast reads clearly at phone size. Angles are degrees from straight down.
 import React from "react";
 
-export type Pose = "stand" | "walk" | "run" | "crouch" | "kneel" | "point" | "phone" | "hold" | "handsup" | "sit" | "look_down" | "reach" | "shrug" | "lean" | "slumped" | "slumped_reach";
+export type Pose = "stand" | "walk" | "run" | "crouch" | "kneel" | "point" | "phone" | "hold" | "handsup" | "sit" | "look_down" | "reach" | "shrug" | "lean" | "slumped" | "slumped_reach" | "kneel_reach" | "kneel_hold" | "pickup" | "frozen" | "hand_mouth" | "look_up";
 export type Expression = "neutral" | "scared" | "angry" | "calm" | "shock" | "sad" | "smirk";
-export type Outfit = { hood?: boolean; cap?: boolean; coat?: boolean; tie?: boolean; scrubs?: boolean; glasses?: boolean; hair?: "short" | "bob" | "bun" | "long" | "silver" | "none"; gloves?: boolean };
+export type Outfit = { hood?: boolean; cap?: boolean; coat?: boolean; tie?: boolean; scrubs?: boolean; glasses?: boolean; hair?: "short" | "bob" | "bun" | "long" | "silver" | "none"; gloves?: boolean;
+  headphones?: "neck" | "on"; lanyard?: boolean; pants?: string; shoes?: string; // pants/shoes: colours (jeans, sneakers)
+};
 export type Item = "phone" | "knife" | "bag" | "envelope" | "badge" | "torch" | "mug" | "suitcase" | "none";
 
 type Limbs = { lean: number; hipDrop: number; lThigh: number; lShin: number; rThigh: number; rShin: number; lUpper: number; lFore: number; rUpper: number; rFore: number; headTilt: number };
@@ -24,6 +26,12 @@ const POSES: Record<string, Limbs> = {
   shrug: { lean: 0, hipDrop: 0, lThigh: 6, lShin: 0, rThigh: -6, rShin: 0, lUpper: 55, lFore: 140, rUpper: -55, rFore: -140, headTilt: -6 },
   slumped: { lean: -28, hipDrop: 150, lThigh: 80, lShin: 70, rThigh: 95, rShin: 60, lUpper: 10, lFore: 20, rUpper: -30, rFore: -40, headTilt: 35 },
   slumped_reach: { lean: -24, hipDrop: 150, lThigh: 80, lShin: 70, rThigh: 95, rShin: 60, lUpper: 85, lFore: 95, rUpper: -30, rFore: -40, headTilt: 20 },
+  kneel_reach: { lean: 14, hipDrop: 95, lThigh: 85, lShin: -5, rThigh: 0, rShin: -90, lUpper: 78, lFore: 88, rUpper: 20, rFore: 40, headTilt: 18 },
+  kneel_hold: { lean: 6, hipDrop: 95, lThigh: 85, lShin: -5, rThigh: 0, rShin: -90, lUpper: 38, lFore: 125, rUpper: 20, rFore: 45, headTilt: 22 },
+  pickup: { lean: 38, hipDrop: 70, lThigh: 65, lShin: -50, rThigh: 30, rShin: -70, lUpper: 20, lFore: 10, rUpper: 25, rFore: 40, headTilt: 20 },
+  frozen: { lean: 2, hipDrop: 0, lThigh: 9, lShin: 0, rThigh: -9, rShin: 0, lUpper: 34, lFore: 62, rUpper: -38, rFore: -52, headTilt: 4 },
+  hand_mouth: { lean: 4, hipDrop: 0, lThigh: 6, lShin: 0, rThigh: -6, rShin: 0, lUpper: 25, lFore: 168, rUpper: -12, rFore: -8, headTilt: -4 },
+  look_up: { lean: -3, hipDrop: 0, lThigh: 6, lShin: 0, rThigh: -6, rShin: 0, lUpper: 14, lFore: 10, rUpper: -14, rFore: -10, headTilt: -24 },
   lean: { lean: -8, hipDrop: 0, lThigh: 14, lShin: 0, rThigh: -2, rShin: 0, lUpper: -20, lFore: -10, rUpper: -35, rFore: -20, headTilt: -6 },
 };
 
@@ -45,11 +53,11 @@ const at = (x: number, y: number, ang: number, len: number) => [x + Math.sin(rad
 
 export type FigureProps = {
   x: number; ground: number; scale?: number; facing?: "left" | "right"; pose?: Pose; phase?: number;
-  color: string; ink: string; skin?: string; outfit?: Outfit; item?: Item; expression?: Expression; glow?: string; label?: string; labelColor?: string; opacity?: number;
+  color: string; ink: string; skin?: string; outfit?: Outfit; item?: Item; item2?: Item; expression?: Expression; glow?: string; label?: string; labelColor?: string; opacity?: number;
   blend?: number; // 0..1 blend from stand to pose (for a pose that eases in)
 };
 
-export const StickFigure: React.FC<FigureProps> = ({ x, ground, scale = 1, facing = "right", pose = "stand", phase = 0, color, ink, outfit = {}, item = "none", expression = "neutral", glow, label, labelColor, opacity = 1, blend = 1 }) => {
+export const StickFigure: React.FC<FigureProps> = ({ x, ground, scale = 1, facing = "right", pose = "stand", phase = 0, color, ink, outfit = {}, item = "none", item2 = "none", expression = "neutral", glow, label, labelColor, opacity = 1, blend = 1 }) => {
   const target = pose === "walk" || pose === "run" ? gait(pose, phase) : POSES[pose] || POSES.stand;
   const base = POSES.stand;
   const j = Object.fromEntries(Object.keys(base).map((k) => [k, (base as any)[k] + ((target as any)[k] - (base as any)[k]) * blend])) as Limbs;
@@ -79,10 +87,12 @@ export const StickFigure: React.FC<FigureProps> = ({ x, ground, scale = 1, facin
       {glow && <ellipse cx={0} cy={-150} rx={170} ry={230} fill={glow} opacity={0.18} />}
       <ellipse cx={0} cy={4} rx={70} ry={12} fill="#000" opacity={0.35} />
       <g stroke={ink} strokeWidth={sw} strokeLinecap="round" strokeLinejoin="round" fill="none">
-        {legs.map((l) => <path key={l.k} d={l.d} stroke={outfit.scrubs ? color : ink} />)}
-        <path d={`M0 ${hipY} L${nx} ${ny}`} stroke={outfit.coat || outfit.hood || outfit.scrubs ? color : ink} strokeWidth={outfit.coat || outfit.hood || outfit.scrubs ? 22 : sw} />
+        {legs.map((l) => <path key={l.k} d={l.d} stroke={outfit.pants || (outfit.scrubs ? color : ink)} />)}
+        {outfit.shoes && legs.map((l) => <ellipse key={"s" + l.k} cx={l.fx + 8} cy={l.fy} rx={17} ry={9} fill={outfit.shoes} stroke={outfit.shoes} />)}
+        <path d={`M0 ${hipY} L${nx} ${ny}`} stroke={outfit.coat || outfit.hood || outfit.scrubs ? color : ink} strokeWidth={outfit.coat || outfit.hood || outfit.scrubs ? 32 : sw} />
         {outfit.tie && <path d={`M${nx * 0.95} ${ny + 14} L${nx * 0.8} ${ny + 70}`} stroke={color} strokeWidth={8} />}
-        {arms.map((a) => <path key={a.k} d={a.d} stroke={outfit.coat || outfit.hood ? color : ink} />)}
+        {arms.map((a) => <path key={a.k} d={a.d} stroke={outfit.coat || outfit.hood ? color : ink} strokeWidth={outfit.coat || outfit.hood ? 14 : sw} />)}
+        {outfit.lanyard && <g><path d={`M${nx - 10} ${ny + 8} L${nx * 0.7 + 4} ${ny + 66} L${nx + 14} ${ny + 8}`} stroke="#d94a4a" strokeWidth={4} /><rect x={nx * 0.7 - 10} y={ny + 64} width={26} height={34} rx={4} fill="#f2f2f2" stroke="none" /></g>}
         {outfit.gloves && arms.map((a) => <circle key={"g" + a.k} cx={a.wx} cy={a.wy} r={9} fill="#111" stroke="#111" />)}
       </g>
       {/* head */}
@@ -101,10 +111,13 @@ export const StickFigure: React.FC<FigureProps> = ({ x, ground, scale = 1, facin
         </g>
         {expression === "angry" && <path d="M2 -18 L18 -12 M34 -18 L22 -12" stroke={ink} strokeWidth={5} strokeLinecap="round" />}
         <path d={mouth[expression] || mouth.neutral} transform="translate(18 2)" stroke={ink} strokeWidth={5} fill={expression === "shock" ? ink : "none"} strokeLinecap="round" />
+        {outfit.headphones === "on" && <g><path d="M-44 6 Q-46 -62 4 -64 Q50 -60 44 6" stroke={outfit.hood ? "#f2c230" : "#f2c230"} strokeWidth={9} fill="none" /><rect x={-40} y={-12} width={26} height={38} rx={10} fill="#f2c230" stroke="#111" strokeWidth={3} /></g>}
         {outfit.glasses && <path d="M0 -6 h20 M16 -6 h20" stroke={color} strokeWidth={4} fill="none" />}
       </g>
-      {/* item in the lead hand */}
+      {outfit.headphones === "neck" && <g transform={`translate(${nx} ${ny - 4})`}><path d="M-30 -14 Q0 30 30 -14" stroke="#f2c230" strokeWidth={9} fill="none" /><circle cx={28} cy={-10} r={15} fill="#f2c230" stroke="#111" strokeWidth={3} /><circle cx={-28} cy={-10} r={13} fill="#c99d1c" stroke="#111" strokeWidth={3} /></g>}
+      {/* items: the lead hand, then the other hand */}
       <Held item={item} x={hand.wx} y={hand.wy} ink={ink} accent={color} />
+      <Held item={item2} x={arms[1].wx} y={arms[1].wy} ink={ink} accent={color} />
       {label && (
         <g transform={`scale(${flip} 1)`}>
           <text x={0} y={hy * 1 - 80} textAnchor="middle" fontFamily="monospace" fontSize={30} fontWeight={700} fill={labelColor || color} letterSpacing={3}>{label.toUpperCase()}</text>
@@ -117,7 +130,7 @@ export const StickFigure: React.FC<FigureProps> = ({ x, ground, scale = 1, facin
 const Held: React.FC<{ item: Item; x: number; y: number; ink: string; accent: string }> = ({ item, x, y, ink, accent }) => {
   if (item === "none") return null;
   if (item === "phone") return <g transform={`translate(${x} ${y})`}><rect x={-14} y={-26} width={28} height={48} rx={6} fill="#111" stroke={ink} strokeWidth={4} /><rect x={-9} y={-20} width={18} height={34} rx={3} fill="#8fd0ff" opacity={0.9} /><circle r={60} fill="#8fd0ff" opacity={0.12} /></g>;
-  if (item === "knife") return <g transform={`translate(${x} ${y}) rotate(25)`}><rect x={-5} y={-8} width={10} height={26} rx={3} fill="#3a2a1a" /><path d="M-4 -8 L0 -62 L5 -8 Z" fill="#cfd6df" /></g>;
+  if (item === "knife") return <g transform={`translate(${x} ${y}) rotate(160)`}><rect x={-7} y={-10} width={14} height={32} rx={4} fill="#4a3220" stroke="#111" strokeWidth={2} /><path d="M-7 -10 L1 -96 L8 -10 Z" fill="#e3e8ef" stroke="#111" strokeWidth={2} /><circle cx={2} cy={-70} r={5} fill="#fff" opacity={0.9} /></g>;
   if (item === "bag") return <g transform={`translate(${x} ${y})`}><path d="M-28 0 h56 l-6 70 h-44 Z" fill="rgba(220,230,240,.25)" stroke={ink} strokeWidth={4} /><path d="M-16 0 q16 -26 32 0" stroke={ink} strokeWidth={4} fill="none" /></g>;
   if (item === "envelope") return <g transform={`translate(${x} ${y}) rotate(-10)`}><rect x={-34} y={-20} width={68} height={42} fill="#e8dcc0" stroke={ink} strokeWidth={3} /><path d="M-34 -20 L0 6 L34 -20" stroke="#8a7a5a" strokeWidth={3} fill="none" /></g>;
   if (item === "badge") return <g transform={`translate(${x} ${y})`}><path d="M0 -26 L20 -14 L16 14 L0 24 L-16 14 L-20 -14 Z" fill="#d8b44a" stroke={ink} strokeWidth={3} /></g>;

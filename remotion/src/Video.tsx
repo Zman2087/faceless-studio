@@ -55,6 +55,57 @@ const OverlayView: React.FC<{ o: Overlay; t: Theme }> = ({ o, t }) => {
         {o.sub && <div style={{ display: "table", marginTop: 10, background: "rgba(0,0,0,.65)", color: "#fff", fontFamily: t.font, fontWeight: 600, fontSize: 38, padding: "10px 22px", borderRadius: 12 }}>{o.sub}</div>}
       </div>
     );
+  if (o.type === "titlecard" && o.style === "poster") {
+    // Illustrated-series title (the part's thumbnail look): a letter-spaced kicker, PART + a huge accent numeral,
+    // a short accent rule, then the part title. Left-aligned over a soft dark fade so it reads on any art.
+    const k = (d: number) => (instant ? 1 : spring({ frame: f - d * fps, fps, config: { damping: 16, mass: 0.7 } }));
+    const kick = o.kicker || "";
+    const shown = instant ? kick.length : Math.floor(interpolate(f, [0, 0.6 * fps], [0, kick.length], { extrapolateRight: "clamp" }));
+    const top = o.y ?? 230;
+    const z = o.size ?? 1; // scale for other frames (e.g. 0.6 on a 1280x720 YouTube thumbnail)
+    const right = o.align === "right";
+    const shadow = "0 6px 26px rgba(0,0,0,.65)";
+    return (
+      <AbsoluteFill>
+        <AbsoluteFill style={{ background: right ? `linear-gradient(270deg, rgba(0,0,0,${0.7 * k(0)}) 0%, rgba(0,0,0,${0.35 * k(0)}) 45%, rgba(0,0,0,0) 65%)` : `linear-gradient(180deg, rgba(0,0,0,${0.55 * k(0)}) 0%, rgba(0,0,0,${0.25 * k(0)}) 38%, rgba(0,0,0,0) 55%)` }} />
+        <div style={{ position: "absolute", left: 64 * z, right: 64 * z, top, textAlign: right ? "right" : "left" }}>
+          {kick && <div style={{ fontFamily: "'Courier New', monospace", fontWeight: 700, fontSize: 34 * z, letterSpacing: 9 * z, color: "rgba(255,255,255,.88)", textTransform: "uppercase", textShadow: shadow, marginBottom: 6 }}>{kick.slice(0, shown)}</div>}
+          <div style={{ display: "flex", alignItems: "flex-end", justifyContent: right ? "flex-end" : "flex-start", gap: 34 * z, height: 330 * z }}>
+            <div style={{ fontFamily: t.font, fontWeight: 900, fontSize: 142 * z, lineHeight: 0.9, color: t.text, letterSpacing: -2, textShadow: shadow, transform: `translateX(${(1 - k(0.15)) * -140}px)`, opacity: k(0.15), paddingBottom: 18 * z }}>PART</div>
+            {o.number && <div style={{ fontFamily: t.font, fontWeight: 900, fontSize: 380 * z, lineHeight: 0.8, color: t.accent, letterSpacing: -8, textShadow: shadow, transform: `translateY(${(1 - k(0.3)) * -120}px) scale(${0.8 + 0.2 * k(0.3)})`, transformOrigin: "bottom left", opacity: k(0.3) }}>{o.number}</div>}
+          </div>
+          <div style={{ width: 150 * z * k(0.5), height: 12 * z, background: t.accent, borderRadius: 6 * z, margin: `${30 * z}px ${right ? 0 : "auto"} ${26 * z}px ${right ? "auto" : 0}`, boxShadow: shadow }} />
+          <div style={{ fontFamily: t.font, fontWeight: 900, fontSize: (o.text.length > 14 ? 104 : 128) * z, lineHeight: 0.98, color: t.text, letterSpacing: -3, textTransform: "uppercase", textShadow: shadow, opacity: k(0.6), transform: `translateY(${(1 - k(0.6)) * 50}px)` }}>{o.text}</div>
+          {o.sub && <div style={{ marginTop: 34, fontFamily: "'Courier New', monospace", fontWeight: 700, fontSize: 30 * z, letterSpacing: 6 * z, color: t.accent, textTransform: "uppercase", opacity: k(0.8), textShadow: shadow }}>{o.sub}</div>}
+        </div>
+      </AbsoluteFill>
+    );
+  }
+  if (o.type === "choice" && o.style === "poster") {
+    // Illustrated-series vote card: the art stays visible behind a dark fade; letter tiles in the accent colour.
+    const opts = o.options || [];
+    const shadow = "0 4px 18px rgba(0,0,0,.7)";
+    return (
+      <AbsoluteFill style={{ justifyContent: "flex-end", padding: "0 64px 230px" }}>
+        <AbsoluteFill style={{ background: `linear-gradient(0deg, rgba(5,5,8,${0.92 * p}) 0%, rgba(5,5,8,${0.85 * p}) 48%, rgba(5,5,8,${0.35 * p}) 72%, rgba(0,0,0,0) 100%)` }} />
+        <div style={{ position: "relative" }}>
+          <div style={{ fontFamily: "'Courier New', monospace", fontWeight: 700, fontSize: 34, letterSpacing: 10, color: t.accent, marginBottom: 18, opacity: p, textShadow: shadow }}>YOU DECIDE</div>
+          <div style={{ width: 120 * p, height: 10, background: t.accent, borderRadius: 5, marginBottom: 30 }} />
+          <div style={{ fontFamily: t.font, fontWeight: 900, fontSize: 76, lineHeight: 1.05, color: t.text, marginBottom: 48, opacity: p, letterSpacing: -1, textShadow: shadow }}>{o.text}</div>
+          {opts.map((op, i) => {
+            const q = spring({ frame: f - (0.35 + i * 0.22) * fps, fps, config: { damping: 15 } });
+            return (
+              <div key={i} style={{ display: "flex", alignItems: "center", gap: 30, padding: "22px 0", borderTop: i ? "2px solid rgba(255,255,255,.14)" : "none", opacity: q, transform: `translateX(${(1 - q) * -90}px)` }}>
+                <div style={{ minWidth: 104, height: 104, borderRadius: 14, background: t.accent, color: onAccent(t.accent), fontFamily: t.font, fontWeight: 900, fontSize: 70, display: "flex", alignItems: "center", justifyContent: "center", boxShadow: shadow }}>{op.key}</div>
+                <div style={{ fontFamily: t.font, fontWeight: 800, fontSize: 56, color: t.text, lineHeight: 1.12, textShadow: shadow }}>{op.label}</div>
+              </div>
+            );
+          })}
+          {o.sub && <div style={{ marginTop: 34, fontFamily: "'Courier New', monospace", fontWeight: 700, fontSize: 36, letterSpacing: 5, color: "rgba(255,255,255,.9)", textTransform: "uppercase", opacity: interpolate(f, [0.9 * fps, 1.2 * fps], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) }}>{o.sub}</div>}
+        </div>
+      </AbsoluteFill>
+    );
+  }
   if (o.type === "titlecard") {
     // The recurring series title (the thumbnail look): huge stacked caps, one line in the accent colour, a part pill.
     const lines = o.text.split("|").map((x) => x.trim());
@@ -185,6 +236,24 @@ const OverlayView: React.FC<{ o: Overlay; t: Theme }> = ({ o, t }) => {
   );
 };
 
+// Subtle film grain for illustrated parts: an SVG noise tile whose offset jumps every frame.
+const GRAIN = "data:image/svg+xml;utf8," + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="240" height="240"><filter id="n"><feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" stitchTiles="stitch"/><feColorMatrix values="0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 0 0.5  0 0 0 1.2 0"/></filter><rect width="100%" height="100%" filter="url(#n)"/></svg>');
+const Grain: React.FC = () => {
+  const f = useCurrentFrame();
+  return <AbsoluteFill style={{ backgroundImage: `url("${GRAIN}")`, backgroundPosition: `${(f * 73) % 240}px ${(f * 151) % 240}px`, opacity: 0.09, mixBlendMode: "overlay", pointerEvents: "none" }} />;
+};
+
+// Music and ambience sit low and dip further while anyone speaks (word timings), so the voice always leads.
+const useBedVolume = (base: number, words: Word[] | undefined, duck: number) => {
+  const { fps } = useVideoConfig();
+  return (frame: number) => {
+    if (!words?.length) return base;
+    const t = frame / fps;
+    const near = words.some((w) => t >= w.s - 0.25 && t <= w.e + 0.35);
+    return base * (near ? duck : 1);
+  };
+};
+
 export const Video: React.FC<Spec> = (spec) => {
   const { fps } = useVideoConfig();
   const t: Theme = { ...DEFAULT_THEME, ...(spec.theme || {}) };
@@ -192,6 +261,8 @@ export const Video: React.FC<Spec> = (spec) => {
   t.font = `"${t.font}", Montserrat, sans-serif`;
   const shots = [...(spec.shots || [])].sort((a, b) => a.at - b.at);
   const total = Math.round(spec.duration * fps);
+  const musicVol = useBedVolume(spec.music_volume ?? 0.12, spec.words, spec.duck ?? 0.6);
+  const ambVol = useBedVolume(spec.ambience_volume ?? 0.08, spec.words, Math.min(1, (spec.duck ?? 0.6) + 0.2));
   const sceneLed = (spec.shots || []).some((x) => x.type === "scene"); // drawn scenes: captions sit below the ground line, clear of the cast
   const cap = { enabled: true, words_per_chunk: 3, y: sceneLed ? 1660 : 1280, case: "sentence", ...(spec.captions || {}) };
   return (
@@ -213,10 +284,12 @@ export const Video: React.FC<Spec> = (spec) => {
       })}
       {cap.enabled && spec.words && spec.words.length > 0 && <Captions words={spec.words} t={t} per={cap.words_per_chunk!} y={cap.y!} upper={cap.case === "upper"}
         hide={(spec.overlays || []).filter((o) => o.type === "choice").map((o) => [o.at, o.end ?? spec.duration] as [number, number])} />}
+      {spec.grain && <Grain />}
       {spec.watermark && <div style={{ position: "absolute", right: 40, top: 60, fontFamily: t.font, fontWeight: 700, fontSize: 30, color: "rgba(255,255,255,.7)" }}>{spec.watermark}</div>}
       {spec.ai_label === true && <div style={{ position: "absolute", left: 40, top: 60, fontFamily: "monospace", fontSize: 22, color: "rgba(255,255,255,.55)" }}>AI-generated</div>}
       {spec.audio && <Audio src={resolve(spec.audio)} volume={spec.audio_volume ?? 1} />}
-      {spec.music && <Audio src={resolve(spec.music)} volume={spec.music_volume ?? 0.12} loop />}
+      {spec.music && <Audio src={resolve(spec.music)} volume={musicVol} loop />}
+      {spec.ambience && <Audio src={resolve(spec.ambience)} volume={ambVol} loop />}
       {(spec.sounds || []).map((x, i) => <Sequence key={"snd" + i} from={Math.round(x.at * fps)} name={`sound ${i + 1}`}><Audio src={resolve(x.src)} volume={x.volume ?? 1} /></Sequence>)}
     </AbsoluteFill>
   );

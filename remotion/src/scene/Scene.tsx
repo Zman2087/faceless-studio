@@ -10,12 +10,12 @@ export type CastMember = { color: string; outfit?: Outfit; name?: string };
 export type Actor = {
   cast?: string; color?: string; outfit?: Outfit; label?: string;
   x: number; y?: number; scale?: number; facing?: "left" | "right";
-  pose?: Pose; then?: { at: number; pose: Pose; expression?: Expression; item?: Item; facing?: "left" | "right" }[];
+  pose?: Pose; then?: { at: number; pose: Pose; expression?: Expression; item?: Item; item2?: Item; facing?: "left" | "right" }[];
   move?: { to: number; at?: number; dur?: number; gait?: "walk" | "run" };
-  item?: Item; expression?: Expression; enter_at?: number; exit_at?: number; glow?: boolean;
+  item?: Item; item2?: Item; expression?: Expression; enter_at?: number; exit_at?: number; glow?: boolean;
 };
-export type Prop = { type: "ute" | "car" | "police" | "bin" | "door" | "sign" | "screen" | "phone" | "tape" | "chair" | "knife" | "bag" | "drain" | "boat" | "truck"; x: number; y?: number; scale?: number; text?: string; at?: number; flip?: boolean };
-export type Fx = "rain" | "sirens" | "flicker" | "heartbeat" | "fog" | "flash" | "letterbox" | "spotlight" | "dark" | "shake";
+export type Prop = { skew?: number; figure?: "bun" | "short" | "none"; gesture?: "hand_mouth" | "point" | "still"; w?: number; h?: number; type: "window" | "ute" | "car" | "police" | "bin" | "door" | "sign" | "screen" | "phone" | "tape" | "chair" | "knife" | "bag" | "drain" | "boat" | "truck"; x: number; y?: number; scale?: number; text?: string; at?: number; flip?: boolean };
+export type Fx = "siren_rise" | "streaks" | "rain" | "sirens" | "flicker" | "heartbeat" | "fog" | "flash" | "letterbox" | "spotlight" | "dark" | "shake";
 export type SceneShot = {
   type: "scene"; at: number; set: SetName; time?: "night" | "dawn" | "day"; text?: string; lit?: number[];
   camera?: { zoom?: [number, number]; x?: [number, number]; y?: [number, number]; ease?: "in" | "out" | "inout" | "linear" };
@@ -46,7 +46,7 @@ export const Scene: React.FC<{ s: SceneShot; t: Theme; cast?: Record<string, Cas
 
   const T = s.relative ? d / fps : 1; // relative timing: fractions of the shot
   const actorAt = (a: Actor) => {
-    let x = a.x, pose: Pose = a.pose || "stand", expr = a.expression || "neutral", item = a.item || "none", facing = a.facing || "right", moving = false;
+    let x = a.x, pose: Pose = a.pose || "stand", expr = a.expression || "neutral", item = a.item || "none", item2 = a.item2 || "none", facing = a.facing || "right", moving = false;
     if (a.move) {
       const m0 = (a.move.at ?? 0) * T * fps, m1 = m0 + (a.move.dur ?? (s.relative ? 0.5 : 2)) * T * fps;
       const q = interpolate(f, [m0, m1], [0, 1], { extrapolateLeft: "clamp", extrapolateRight: "clamp" });
@@ -56,11 +56,11 @@ export const Scene: React.FC<{ s: SceneShot; t: Theme; cast?: Record<string, Cas
     }
     let blend = 1;
     for (const th of a.then || []) if (sec >= th.at * T) {
-      if (!moving) pose = th.pose; if (th.expression) expr = th.expression; if (th.item) item = th.item; if (th.facing) facing = th.facing;
+      if (!moving) pose = th.pose; if (th.expression) expr = th.expression; if (th.item) item = th.item; if (th.item2) item2 = th.item2; if (th.facing) facing = th.facing;
       blend = interpolate(f, [th.at * T * fps, th.at * T * fps + 6], [0, 1], { extrapolateRight: "clamp" });
     }
     const speed = a.move?.gait === "run" ? 0.55 : 0.32;
-    return { x, pose, expr, item, facing, phase: f * speed, blend: moving ? 1 : blend };
+    return { x, pose, expr, item, item2, facing, moving, run: a.move?.gait === "run", phase: f * speed, blend: moving ? 1 : blend };
   };
 
   return (
@@ -68,17 +68,22 @@ export const Scene: React.FC<{ s: SceneShot; t: Theme; cast?: Record<string, Cas
       <svg viewBox={`0 0 ${W} ${H}`} width="100%" height="100%" style={{ position: "absolute", inset: 0 }}>
         <g transform={`translate(${W / 2 + sx} ${H * 0.62 + sy}) scale(${z}) translate(${-cx} ${-cy})`}>
           <SetView name={s.set} p={p} f={f} text={s.text} lit={s.lit} flicker={flicker} />
-          {(s.props || []).filter((pr) => sec >= (pr.at ?? 0) * T).map((pr, i) => <PropView key={i} pr={pr} p={p} f={f} fps={fps} />)}
+          {(s.props || []).filter((pr) => pr.type === "window" || sec >= (pr.at ?? 0) * T).map((pr, i) => <PropView key={i} pr={pr} p={p} f={f} fps={fps} T={T} />)}
           {(s.actors || []).map((a, i) => {
             if (a.enter_at != null && sec < a.enter_at * T) return null;
             if (a.exit_at != null && sec >= a.exit_at * T) return null;
             const c = (a.cast && cast[a.cast]) || ({} as CastMember);
             const st = actorAt(a);
             const op = a.enter_at != null ? interpolate(f, [a.enter_at * T * fps, a.enter_at * T * fps + 6], [0, 1], { extrapolateRight: "clamp" }) : 1;
+            const sc = a.scale ?? 1, gy = a.y ?? GROUND + 40;
+            const streaks = st.moving && (st.run || fx.has("streaks"));
             return (
-              <StickFigure key={i} x={st.x} ground={a.y ?? GROUND + 40} scale={a.scale ?? 1} facing={st.facing} pose={st.pose} phase={st.phase} blend={st.blend}
+              <g key={i}>
+              {streaks && <g stroke={p.ink} strokeWidth={5 * sc} strokeLinecap="round" opacity={0.45}>{[0.25, 0.45, 0.62, 0.8].map((h, k) => { const dir = st.facing === "left" ? 1 : -1; const len = (120 + 60 * random(`st${k}${Math.floor(f / 2)}`)) * sc; const y0 = gy - h * 420 * sc; const x0 = st.x + dir * 50 * sc; return <line key={k} x1={x0} y1={y0} x2={x0 + dir * len} y2={y0} />; })}</g>}
+              <StickFigure x={st.x} ground={a.y ?? GROUND + 40} scale={a.scale ?? 1} facing={st.facing} pose={st.pose} phase={st.phase} blend={st.blend}
                 color={a.color || c.color || t.accent} ink={p.ink} outfit={{ ...(c.outfit || {}), ...(a.outfit || {}) }} item={st.item} expression={st.expr}
-                glow={a.glow ? p.light : undefined} label={a.label} opacity={op} />
+                glow={a.glow ? p.light : undefined} label={a.label} opacity={op} item2={st.item2} />
+              </g>
             );
           })}
         </g>
@@ -88,6 +93,7 @@ export const Scene: React.FC<{ s: SceneShot; t: Theme; cast?: Record<string, Cas
       {fxOn("dark") && <AbsoluteFill style={{ background: "rgba(0,0,0,.45)" }} />}
       {fxOn("spotlight") && <Spot s={s} actorX={(() => { const a = (s.actors || [])[s.spot ?? 0]; return a ? actorAt(a).x : W / 2; })()} z={z} cx={cx} cy={cy} />}
       {fxOn("sirens") && <Sirens f={f} p={p} />}
+      {fx.has("siren_rise") && sec >= (s.fx_at?.siren_rise ?? 0) * T && <Sirens f={f} p={p} level={interpolate(sec, [(s.fx_at?.siren_rise ?? 0) * T, (s.fx_at?.siren_rise ?? 0) * T + 6], [0.15, 1], { extrapolateRight: "clamp" }) * ((s as any).siren_level ?? 1)} />}
       {fxOn("heartbeat") && <Heart f={f} fps={fps} />}
       {fxOn("flash") && <AbsoluteFill style={{ background: "#fff", opacity: interpolate(f, [(s.fx_at?.flash ?? 0) * T * fps, (s.fx_at?.flash ?? 0) * T * fps + 8], [0.9, 0], { extrapolateLeft: "clamp", extrapolateRight: "clamp" }) }} />}
       {fxOn("letterbox") && <><div style={{ position: "absolute", left: 0, right: 0, top: 0, height: 150, background: "#000" }} /><div style={{ position: "absolute", left: 0, right: 0, bottom: 0, height: 150, background: "#000" }} /></>}
@@ -108,9 +114,10 @@ const Rain: React.FC<{ f: number }> = ({ f }) => (
 const Fog: React.FC<{ f: number }> = ({ f }) => (
   <g opacity={0.22}>{[0, 1, 2].map((i) => <ellipse key={i} cx={((f * (1.5 + i) + i * 400) % (W + 800)) - 400} cy={GROUND - 60 + i * 90} rx={600} ry={70} fill="#c8d2e0" />)}</g>
 );
-const Sirens: React.FC<{ f: number; p: Pal }> = ({ f, p }) => {
+const Sirens: React.FC<{ f: number; p: Pal; level?: number }> = ({ f, p, level = 1 }) => {
   const on = Math.floor(f / 7) % 2 === 0;
-  return <AbsoluteFill style={{ background: `linear-gradient(90deg, ${on ? "rgba(255,40,60,.32)" : "transparent"} 0%, transparent 35%, transparent 65%, ${on ? "transparent" : "rgba(40,110,255,.32)"} 100%)`, mixBlendMode: "screen" }} />;
+  const a = (0.32 * level).toFixed(3);
+  return <AbsoluteFill style={{ background: `linear-gradient(90deg, ${on ? `rgba(255,40,60,${a})` : "transparent"} 0%, transparent 35%, transparent 65%, ${on ? "transparent" : `rgba(40,110,255,${a})`} 100%)`, mixBlendMode: "screen" }} />;
 };
 const Heart: React.FC<{ f: number; fps: number }> = ({ f, fps }) => {
   const q = (f % Math.round(fps * 0.8)) / (fps * 0.8);
@@ -122,7 +129,7 @@ const Spot: React.FC<{ s: SceneShot; actorX: number; z: number; cx: number; cy: 
   return <AbsoluteFill style={{ background: `radial-gradient(circle at ${px}% ${py}%, transparent 0, transparent 14%, rgba(0,0,0,.78) 30%)` }} />;
 };
 
-const PropView: React.FC<{ pr: Prop; p: Pal; f: number; fps: number }> = ({ pr, p, f, fps }) => {
+const PropView: React.FC<{ pr: Prop; p: Pal; f: number; fps: number; T?: number }> = ({ pr, p, f, fps, T = 1 }) => {
   const y = pr.y ?? GROUND + 40, sc = pr.scale ?? 1;
   const g = (el: React.ReactNode) => <g transform={`translate(${pr.x} ${y}) scale(${pr.flip ? -sc : sc} ${sc})`}>{el}</g>;
   switch (pr.type) {
@@ -136,6 +143,27 @@ const PropView: React.FC<{ pr: Prop; p: Pal; f: number; fps: number }> = ({ pr, 
         <circle cx={big ? 250 : 222} cy={-90} r={12} fill={p.light} /><path d={`M${big ? 250 : 222} -90 L${big ? 700 : 650} -150 L${big ? 700 : 650} -20 Z`} fill={p.light} opacity={0.15} />
         {pr.text && <text x={big ? -70 : 0} y={big ? -150 : -70} textAnchor="middle" fontFamily="monospace" fontSize={big ? 44 : 30} fontWeight={700} fill={pr.type === "police" ? "#1a2a5a" : "#d8d0bf"}>{pr.text}</text>}
       </>);
+    }
+    case "window": {
+      // A window that is dark until `at`, then snaps on (a flicker), with a silhouette behind the glass.
+      const on0 = (pr.at ?? 0) * T * fps;
+      const lit = f < on0 ? 0 : f < on0 + 4 ? (Math.floor((f - on0)) % 2 ? 0.3 : 1) : 1;
+      const w = pr.w ?? 180, h = pr.h ?? 240;
+      const fig = pr.figure ?? "bun";
+      const g2 = pr.gesture ?? "hand_mouth";
+      return <g transform={`translate(${pr.x} ${pr.y ?? 700}) scale(${sc}) skewY(${pr.skew ?? 0})`}>
+        {lit > 0 && <ellipse cx={0} cy={h * 0.6} rx={w * 1.6} ry={h * 1.4} fill={p.window} opacity={0.16 * lit} />}
+        <rect x={-w / 2} y={-h / 2} width={w} height={h} fill={lit ? p.window : p.wall2} opacity={lit ? 0.95 * lit : 1} stroke={p.line} strokeWidth={6} />
+        {lit > 0 && fig !== "none" && <g fill="#14100c" opacity={lit}>
+          <circle cx={-6} cy={-h * 0.12} r={w * 0.16} />
+          {fig === "bun" && <circle cx={-6 - w * 0.12} cy={-h * 0.12 - w * 0.13} r={w * 0.08} />}
+          <path d={`M${-w * 0.36} ${h / 2} Q${-w * 0.34} ${-h * 0.02} ${-6} ${-h * 0.0} Q${w * 0.3} ${-h * 0.02} ${w * 0.32} ${h / 2} Z`} />
+          {g2 === "hand_mouth" && <path d={`M${w * 0.2} ${h * 0.3} L${w * 0.12} ${-h * 0.02}`} stroke="#14100c" strokeWidth={w * 0.07} strokeLinecap="round" />}
+          {g2 === "point" && <path d={`M${w * 0.2} ${h * 0.15} L${w * 0.46} ${h * 0.34}`} stroke="#14100c" strokeWidth={w * 0.07} strokeLinecap="round" />}
+          {(fig === "bun") && <path d={`M${-6 - w * 0.13} ${-h * 0.14} h${w * 0.11} M${-6 + w * 0.02} ${-h * 0.14} h${w * 0.11}`} stroke={p.window} strokeWidth={3} />}
+        </g>}
+        <line x1={0} y1={-h / 2} x2={0} y2={h / 2} stroke={p.line} strokeWidth={5} /><line x1={-w / 2} y1={0} x2={w / 2} y2={0} stroke={p.line} strokeWidth={5} opacity={0.6} />
+      </g>;
     }
     case "bin": return g(<rect x={-60} y={-150} width={120} height={150} rx={8} fill="#1b2a22" stroke={p.ink} strokeWidth={4} />);
     case "drain": return g(<><rect x={-90} y={-10} width={180} height={34} fill="#050505" stroke={p.ink} strokeWidth={4} />{[-60, -30, 0, 30, 60].map((x) => <line key={x} x1={x} y1={-10} x2={x} y2={24} stroke={p.ink} strokeWidth={4} />)}</>);

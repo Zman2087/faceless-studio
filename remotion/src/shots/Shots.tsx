@@ -74,19 +74,45 @@ const Label: React.FC<{ text?: string; t: Theme }> = ({ text, t }) =>
     </div>
   ) : null;
 
-const Media: React.FC<{ src: string; start?: number; fit?: "cover" | "contain"; kenburns?: boolean; muted?: boolean; dim?: number }> = ({
-  src, start = 0, fit = "cover", kenburns = true, muted = true, dim = 0,
+type Move = "push" | "pull" | "pan_left" | "pan_right" | "rise" | "fall" | "still";
+// Camera moves for stills (illustrated parts): eased, slow, toward a focus point.
+const camera = (move: Move, k: number, fx: number, fy: number) => {
+  const e = k < 0.5 ? 2 * k * k : 1 - Math.pow(-2 * k + 2, 2) / 2; // ease in-out
+  const ox = (0.5 - fx) * 100, oy = (0.5 - fy) * 100; // % shift that keeps the focus point in frame as we zoom
+  switch (move) {
+    case "pull": return { z: 1.16 - 0.1 * e, x: ox * 0.12 * (1 - e), y: oy * 0.12 * (1 - e) };
+    case "pan_left": return { z: 1.14, x: 4 - 8 * e, y: oy * 0.08 };
+    case "pan_right": return { z: 1.14, x: -4 + 8 * e, y: oy * 0.08 };
+    case "rise": return { z: 1.14, x: ox * 0.08, y: -4 + 8 * e };
+    case "fall": return { z: 1.14, x: ox * 0.08, y: 4 - 8 * e };
+    case "still": return { z: 1.04, x: 0, y: 0 };
+    default: return { z: 1.04 + 0.12 * e, x: ox * 0.12 * e, y: oy * 0.12 * e }; // push
+  }
+};
+
+const Media: React.FC<{ src: string; start?: number; fit?: "cover" | "contain"; kenburns?: boolean; muted?: boolean; dim?: number; move?: Move; focus?: { x: number; y: number }; flicker?: boolean; rain?: boolean }> = ({
+  src, start = 0, fit = "cover", kenburns = true, muted = true, dim = 0, move, focus, flicker, rain,
 }) => {
   const f = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
-  const z = kenburns ? interpolate(f, [0, durationInFrames], [1.04, 1.14]) : 1;
-  const style: React.CSSProperties = { width: "100%", height: "100%", objectFit: fit };
+  const k = Math.min(1, f / Math.max(1, durationInFrames));
+  const cam = move ? camera(move, k, focus?.x ?? 0.5, focus?.y ?? 0.5) : { z: kenburns ? interpolate(f, [0, durationInFrames], [1.04, 1.14]) : 1, x: 0, y: 0 };
+  const style: React.CSSProperties = { width: "100%", height: "100%", objectFit: fit, ...(focus ? { objectPosition: `${focus.x * 100}% ${focus.y * 100}%` } : {}) };
+  // flicker: a soft irregular light pulse, deterministic per frame
+  const fl = flicker ? 0.06 * (Math.sin(f * 0.9) * Math.sin(f * 0.37 + 1.3) > 0.55 ? 1 : 0) + 0.02 * Math.sin(f * 0.21) : 0;
   return (
-    <AbsoluteFill style={{ background: "#000" }}>
+    <AbsoluteFill style={{ background: "#000", overflow: "hidden" }}>
       {isVideo(src) ? (
         <OffthreadVideo src={resolve(src)} startFrom={Math.round(start * fps)} muted={muted} style={style} />
       ) : (
-        <Img src={resolve(src)} style={{ ...style, transform: `scale(${z})` }} />
+        <Img src={resolve(src)} style={{ ...style, transform: `translate(${cam.x}%, ${cam.y}%) scale(${cam.z})` }} />
+      )}
+      {flicker && <AbsoluteFill style={{ background: `rgba(0,0,0,${0.08 + fl})` }} />}
+      {rain && (
+        <AbsoluteFill style={{
+          backgroundImage: "repeating-linear-gradient(104deg, rgba(255,255,255,0) 0px, rgba(255,255,255,0) 22px, rgba(220,230,255,.10) 23px, rgba(255,255,255,0) 25px)",
+          backgroundSize: "140px 260px", backgroundPosition: `${-f * 4}px ${f * 38}px`, mixBlendMode: "screen",
+        }} />
       )}
       {dim > 0 && <AbsoluteFill style={{ background: `rgba(0,0,0,${dim})` }} />}
     </AbsoluteFill>
@@ -292,6 +318,8 @@ export const ShotView: React.FC<{ s: Shot; t: Theme; base: number; cast?: Record
       {bg && (
         <Media src={bg} start={isMedia ? (s as any).start : 0} fit={isMedia ? (s as any).fit : "cover"}
           kenburns={isMedia ? (s as any).kenburns !== false : true} muted={isMedia ? (s as any).muted !== false : true}
+          move={isMedia ? (s as any).move : undefined} focus={isMedia ? (s as any).focus : undefined}
+          flicker={isMedia ? (s as any).flicker : false} rain={isMedia ? (s as any).rain : false}
           dim={isMedia ? ((s as any).headline ? 0.35 : 0) : 0.62} />
       )}
       {!bg && (
